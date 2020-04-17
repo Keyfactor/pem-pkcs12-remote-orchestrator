@@ -23,7 +23,7 @@ namespace PEMStoreSSH
         {
             Logger.Debug($"RunCommand: {Server}");
 
-            string sudo = $"echo -e '{ServerPassword}\n\n' | sudo -S ";
+            string sudo = $"echo -e '\n' | sudo -S ";
             using (SshClient client = new SshClient(Server, ServerLogin, ServerPassword))
             {
                 try
@@ -33,12 +33,14 @@ namespace PEMStoreSSH
                     if (withSudo)
                         commandText = sudo + commandText;
 
+                    string displayCommand = commandText.Replace(ServerPassword, "[PASSWORD]");
+
                     using (SshCommand command = client.CreateCommand($"{commandText}"))
                     {
-                        Logger.Debug($"RunCommand: {commandText}");
+                        Logger.Debug($"RunCommand: {displayCommand}");
                         command.Execute();
-                        Logger.Debug($"SSH Results: {commandText} {command.Result}");
-                        Logger.Debug($"SSH Error: {commandText} {command.Error}");
+                        Logger.Debug($"SSH Results: {displayCommand} {command.Result}");
+                        Logger.Debug($"SSH Error: {displayCommand} {command.Error}");
                         return command.Result;
                     }
                 }
