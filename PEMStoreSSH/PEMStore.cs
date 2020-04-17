@@ -157,7 +157,9 @@ namespace PEMStoreSSH
                     command += $"-name '*.{extension}' ";
                 }
 
-                string result = SSH.RunCommand(command, true);
+                string result = string.Empty;
+                if (extensions.Any(p => p.ToLower() != NO_EXTENSION))
+                    result = SSH.RunCommand(command, true);
 
                 if (searchNoExtension)
                     result += ('\n' + SSH.RunCommand(commandNoExt, true));
