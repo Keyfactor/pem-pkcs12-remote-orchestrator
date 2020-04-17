@@ -12,6 +12,8 @@ namespace PEMStoreSSH
 {
     internal class PEMStore
     {
+        private const string NO_EXTENSION = "noext";
+
         public enum FormatTypeEnum
         {
             PEM,
@@ -145,11 +147,11 @@ namespace PEMStoreSSH
                 string command = $"find {concatPaths} ";
                 string commandNoExt = $"find {concatPaths} -type f ! -name '*.*'";
 
-                bool searchNoExtension = extensions.Any(p => p == "*");
+                bool searchNoExtension = extensions.Any(p => p == NO_EXTENSION);
 
                 foreach (string extension in extensions)
                 {
-                    if (extension == "*")
+                    if (extension == NO_EXTENSION)
                         continue;
                     command += (command.IndexOf("-name") == -1 ? string.Empty : "-or ");
                     command += $"-name '*.{extension}' ";
