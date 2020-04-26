@@ -65,11 +65,10 @@ namespace PEMStoreSSH
                 try
                 {
                     client.Connect();
-                    return client.Exists(FormatFTPPath(path));
-                }
-                catch (Exception)
-                {
-                    return false;
+                    string existsPath = FormatFTPPath(path);
+                    bool exists = client.Exists(existsPath);
+
+                    return exists;
                 }
                 finally
                 {

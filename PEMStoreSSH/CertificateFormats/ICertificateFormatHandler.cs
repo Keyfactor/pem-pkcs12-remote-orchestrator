@@ -8,5 +8,6 @@ namespace PEMStoreSSH
         bool HasPrivateKey(byte[] certificateBytes, byte[] privateKeyBytes);
         X509Certificate2Collection RetrieveCertificates(byte[] binaryCertificates, string storePassword);
         List<SSHFileInfo> CreateCertificatePacket(string certToAdd, string pfxPassword, string storePassword, bool hasSeparatePrivateKey);
+        bool IsValidStore(string path, SSHHandler ssh);
     }
 }

@@ -42,13 +42,13 @@ namespace PEMStoreSSH
                 X509Certificate2Collection certificateCollection = new X509Certificate2Collection();
                 string certificates = Encoding.UTF8.GetString(binaryCertificates);
 
-                while(certificates.Contains(CertDelimBeg))
+                while (certificates.Contains(CertDelimBeg))
                 {
                     int certStart = certificates.IndexOf(CertDelimBeg);
                     int certLength = certificates.IndexOf(CertDelimEnd) + CertDelimEnd.Length - certStart;
                     certificateCollection.Add(new X509Certificate2(Encoding.UTF8.GetBytes(certificates.Substring(certStart, certLength))));
 
-                    certificates = certificates.Substring(certLength-1);
+                    certificates = certificates.Substring(certStart + certLength - 1);
                 }
 
                 return certificateCollection;
@@ -110,9 +110,10 @@ namespace PEMStoreSSH
             return fileInfo;
         }
 
-        private void WriteFile(SSHHandler ssh, string path, string contents)
+        public bool IsValidStore(string path, SSHHandler ssh)
         {
-
+            string result = ssh.RunCommand($"grep -i -- '{CertDelimBeg}' {path}", true);
+            return result.IndexOf(CertDelimBeg) > -1;
         }
     }
 }

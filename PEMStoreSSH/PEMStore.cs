@@ -5,9 +5,6 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 
-using CSS.PKI.PEM;
-using CSS.PKI.PrivateKeys;
-
 namespace PEMStoreSSH
 {
     internal class PEMStore
@@ -48,15 +45,16 @@ namespace PEMStoreSSH
             CertificateHandler = GetCertificateHandler(formatType);
             ServerType = StorePath.Substring(0, 1) == "/" ? ServerTypeEnum.Linux : ServerTypeEnum.Windows;
 
-            SSH = new SSHHandler(Server, ServerId, ServerPassword);
+           SSH = new SSHHandler(Server, ServerId, ServerPassword);
         }
 
-        internal PEMStore(string server, string serverId, string serverPassword, ServerTypeEnum serverType)
+        internal PEMStore(string server, string serverId, string serverPassword, ServerTypeEnum serverType, FormatTypeEnum formatType)
         {
             Server = server;
             ServerId = serverId;
             ServerPassword = serverPassword;
             ServerType = serverType;
+            CertificateHandler = GetCertificateHandler(formatType);
 
             SSH = new SSHHandler(Server, ServerId, ServerPassword);
         }
@@ -77,17 +75,14 @@ namespace PEMStoreSSH
             {
                 containsPrivateKey = false;
 
-                if (!SSH.DoesFileExist(StorePath))
-                    return new X509Certificate2Collection();
-
-                byte[] certContents = SSH.DownloadCertificateFile(StorePath);
+                byte[] certContents = ServerType == ServerTypeEnum.Linux ? DownloadLinuxCertificateFile(StorePath) : SSH.DownloadCertificateFile(StorePath);
 
                 X509Certificate2Collection certs = CertificateHandler.RetrieveCertificates(certContents, storePassword);
                 if (certs.Count >= 1)
                 {
                     byte[] privateKeyContentBytes = null;
                     if (!string.IsNullOrEmpty(PrivateKeyPath))
-                        privateKeyContentBytes = SSH.DownloadCertificateFile(PrivateKeyPath);
+                        privateKeyContentBytes = ServerType == ServerTypeEnum.Linux ? DownloadLinuxCertificateFile(PrivateKeyPath) : SSH.DownloadCertificateFile(PrivateKeyPath);
 
                     containsPrivateKey = CertificateHandler.HasPrivateKey(certContents, privateKeyContentBytes);
                 }
@@ -137,6 +132,17 @@ namespace PEMStoreSSH
             {
                 throw new PEMException($"Error attempting to add certificate to store {StorePath}.", ex);
             }
+        }
+
+        internal bool IsValidStore(string path)
+        {
+            return CertificateHandler.IsValidStore(path, SSH);
+        }
+
+        private byte[] DownloadLinuxCertificateFile(string path)
+        {
+            string certs = SSH.RunCommand($"cat {path}", true);
+            return Encoding.ASCII.GetBytes(certs);
         }
 
         private List<string> FindStoresLinux(string[] paths, string[] extensions)

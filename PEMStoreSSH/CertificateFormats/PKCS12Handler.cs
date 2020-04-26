@@ -57,5 +57,10 @@ namespace PEMStoreSSH
 
             return fileInfo;
         }
+
+        public bool IsValidStore(string path, SSHHandler ssh)
+        {
+            return true;
+        }
     }
 }

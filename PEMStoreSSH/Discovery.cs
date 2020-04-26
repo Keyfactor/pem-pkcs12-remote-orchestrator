@@ -29,7 +29,6 @@ namespace PEMStoreSSH
             Logger.Debug($"Begin Discovery...");
 
             List<string> locations = new List<string>();
-            string server = string.Empty;
 
             try
             {
@@ -37,15 +36,16 @@ namespace PEMStoreSSH
                 string[] directoriesToSearch = properties.dirs.Value.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
                 string[] extensionsToSearch = properties.extensions.Value.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
                 string[] ignoredDirs = properties.ignoreddirs.Value.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                bool isP12 = (bool)properties.compatibility.Value;
 
-                PEMStore pemStore = new PEMStore(config.Store.ClientMachine, config.Server.Username, config.Server.Password, directoriesToSearch[0].Substring(0, 1) == "/" ? PEMStore.ServerTypeEnum.Linux : PEMStore.ServerTypeEnum.Windows);
+                PEMStore pemStore = new PEMStore(config.Store.ClientMachine, config.Server.Username, config.Server.Password, directoriesToSearch[0].Substring(0, 1) == "/" ? PEMStore.ServerTypeEnum.Linux : PEMStore.ServerTypeEnum.Windows,
+                    isP12 ? PEMStore.FormatTypeEnum.PKCS12 : PEMStore.FormatTypeEnum.PEM);
 
                 locations = pemStore.FindStores(directoriesToSearch, extensionsToSearch).ToList();
                 foreach (string ignoredDir in ignoredDirs)
                     locations = locations.Where(p => !p.StartsWith(ignoredDir.TrimStart(' '))).ToList();
 
-                // commented out because IsValidCertificate depends on the text inside a CryptographicException
-                //locations = locations.Where(p => pemStore.IsValidCertificate(p)).Select(p => server + ":" + p).ToList();
+                locations = locations.Where(p => pemStore.IsValidStore(p)).ToList();
             }
             catch (Exception ex)
             {
