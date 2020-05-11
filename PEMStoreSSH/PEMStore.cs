@@ -139,6 +139,13 @@ namespace PEMStoreSSH
             return CertificateHandler.IsValidStore(path, SSH);
         }
 
+        internal void CreateBlankCertificateStore(string path)
+        {
+            SSH.RunCommand($"touch {path}",false);
+            //using sudo will create as root. set useSudo to false 
+            //to ensure ownership is with the credentials configued in the platform
+        }
+
         private byte[] DownloadLinuxCertificateFile(string path)
         {
             string certs = SSH.RunCommand($"cat {path}", true);

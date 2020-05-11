@@ -36,8 +36,9 @@ namespace PEMStoreSSH
             Logger.Debug($"Begin Management...");
 
             bool hasPassword = !string.IsNullOrEmpty(config.Job.PfxPassword);
-            byte[] certBytes = Convert.FromBase64String(config.Job.EntryContents);
             
+          
+
             dynamic properties = JsonConvert.DeserializeObject(config.Store.Properties.ToString());
             bool hasSeparatePrivateKey = properties.separatePrivateKey == null || string.IsNullOrEmpty(properties.separatePrivateKey.Value) ? false : Boolean.Parse(properties.separatePrivateKey.Value);
             string privateKeyPath = hasSeparatePrivateKey ? (properties.pathToPrivateKey == null || string.IsNullOrEmpty(properties.pathToPrivateKey.Value) ? null : properties.pathToPrivateKey.Value) : string.Empty;
@@ -50,6 +51,7 @@ namespace PEMStoreSSH
                 switch (config.Job.OperationType)
                 {
                     case AnyJobOperationType.Add:
+                        
                         if (!config.Job.Overwrite)
                         {
                             if (pemStore.DoesStoreExist(config.Store.StorePath))
@@ -66,6 +68,14 @@ namespace PEMStoreSSH
 
                         pemStore.RemoveCertificate();
 
+
+                        break;
+
+                    case AnyJobOperationType.Create:
+                        if (pemStore.DoesStoreExist(config.Store.StorePath))
+                            throw new PEMException($"Certificate store {config.Store.StorePath} already exists and cannot be created.");
+
+                        pemStore.CreateBlankCertificateStore(config.Store.StorePath);
                         break;
 
                     default:
