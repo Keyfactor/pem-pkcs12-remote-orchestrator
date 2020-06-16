@@ -31,7 +31,7 @@ namespace PEMStoreSSH
             }
         }
 
-        public List<SSHFileInfo> CreateCertificatePacket(string certToAdd, string pfxPassword, string storePassword, bool hasSeparatePrivateKey)
+        public List<SSHFileInfo> CreateCertificatePacket(string certToAdd, string alias, string pfxPassword, string storePassword, bool hasSeparatePrivateKey)
         {
             List<SSHFileInfo> fileInfo = new List<SSHFileInfo>();
             Pkcs12Store store;
@@ -44,18 +44,22 @@ namespace PEMStoreSSH
             using (MemoryStream outStream = new MemoryStream())
             {
                 store.Save(outStream, storePassword.ToCharArray(), new Org.BouncyCastle.Security.SecureRandom());
-                //using (StreamReader rdr = new StreamReader(outStream))
-                //{
-                    fileInfo.Add(new SSHFileInfo()
-                    {
-                        FileType = SSHFileInfo.FileTypeEnum.Certificate,
-                        //FileContent = rdr.ReadToEnd(),
-                        FileContentBytes = outStream.ToArray()
-                    });
-                //}
+                fileInfo.Add(new SSHFileInfo()
+                {
+                    FileType = SSHFileInfo.FileTypeEnum.Certificate,
+                    FileContentBytes = outStream.ToArray(),
+                    Alias = alias
+                });
             }
 
             return fileInfo;
+        }
+
+        public void AddCertificateToStore(List<SSHFileInfo> files, string storePath, string privateKeyPath, SSHHandler ssh, PEMStore.ServerTypeEnum serverType, bool overwrite, bool hasPrivateKey)
+        {
+            foreach (SSHFileInfo file in files)
+                ssh.UploadCertificateFile(file.FileType == SSHFileInfo.FileTypeEnum.Certificate ? storePath : privateKeyPath,
+                    string.IsNullOrEmpty(file.FileContents) ? file.FileContentBytes : Encoding.ASCII.GetBytes(file.FileContents));
         }
 
         public bool IsValidStore(string path, SSHHandler ssh)

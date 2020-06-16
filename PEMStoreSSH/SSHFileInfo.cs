@@ -17,5 +17,6 @@ namespace PEMStoreSSH
         public FileTypeEnum FileType { get; set; }
         public string FileContents { get; set; }
         public byte[] FileContentBytes { get; set; }
+        public string Alias { get; set; }
     }
 }

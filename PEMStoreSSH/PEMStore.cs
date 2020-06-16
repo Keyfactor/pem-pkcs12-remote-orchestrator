@@ -75,14 +75,14 @@ namespace PEMStoreSSH
             {
                 containsPrivateKey = false;
 
-                byte[] certContents = ServerType == ServerTypeEnum.Linux ? DownloadLinuxCertificateFile(StorePath) : SSH.DownloadCertificateFile(StorePath);
+                byte[] certContents = ServerType == ServerTypeEnum.Linux ? SSH.DownloadLinuxCertificateFile(StorePath) : SSH.DownloadCertificateFile(StorePath);
 
                 X509Certificate2Collection certs = CertificateHandler.RetrieveCertificates(certContents, storePassword);
                 if (certs.Count >= 1)
                 {
                     byte[] privateKeyContentBytes = null;
                     if (!string.IsNullOrEmpty(PrivateKeyPath))
-                        privateKeyContentBytes = ServerType == ServerTypeEnum.Linux ? DownloadLinuxCertificateFile(PrivateKeyPath) : SSH.DownloadCertificateFile(PrivateKeyPath);
+                        privateKeyContentBytes = ServerType == ServerTypeEnum.Linux ? SSH.DownloadLinuxCertificateFile(PrivateKeyPath) : SSH.DownloadCertificateFile(PrivateKeyPath);
 
                     containsPrivateKey = CertificateHandler.HasPrivateKey(certContents, privateKeyContentBytes);
                 }
@@ -119,14 +119,12 @@ namespace PEMStoreSSH
             }
         }
 
-        internal void AddCertificateToStore(string cert, string pfxPassword, string storePassword)
+        internal void AddCertificateToStore(string cert, string alias, string pfxPassword, string storePassword, bool overwrite, bool containsPrivateKey)
         {
             try
             {
-                List<SSHFileInfo> files = CertificateHandler.CreateCertificatePacket(cert, pfxPassword, storePassword, !String.IsNullOrEmpty(PrivateKeyPath));
-                foreach (SSHFileInfo file in files)
-                    SSH.UploadCertificateFile(file.FileType == SSHFileInfo.FileTypeEnum.Certificate ? StorePath : PrivateKeyPath, 
-                        string.IsNullOrEmpty(file.FileContents) ? file.FileContentBytes : Encoding.ASCII.GetBytes(file.FileContents));
+                List<SSHFileInfo> files = CertificateHandler.CreateCertificatePacket(cert, alias, pfxPassword, storePassword, !String.IsNullOrEmpty(PrivateKeyPath));
+                CertificateHandler.AddCertificateToStore(files, StorePath, PrivateKeyPath, SSH, ServerType, overwrite, containsPrivateKey);
             }
             catch (Exception ex)
             {
@@ -144,12 +142,6 @@ namespace PEMStoreSSH
             SSH.RunCommand($"touch {path}",false);
             //using sudo will create as root. set useSudo to false 
             //to ensure ownership is with the credentials configued in the platform
-        }
-
-        private byte[] DownloadLinuxCertificateFile(string path)
-        {
-            string certs = SSH.RunCommand($"cat {path}", true);
-            return Encoding.ASCII.GetBytes(certs);
         }
 
         private List<string> FindStoresLinux(string[] paths, string[] extensions)

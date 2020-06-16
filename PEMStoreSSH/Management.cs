@@ -37,8 +37,6 @@ namespace PEMStoreSSH
 
             bool hasPassword = !string.IsNullOrEmpty(config.Job.PfxPassword);
             
-          
-
             dynamic properties = JsonConvert.DeserializeObject(config.Store.Properties.ToString());
             bool hasSeparatePrivateKey = properties.separatePrivateKey == null || string.IsNullOrEmpty(properties.separatePrivateKey.Value) ? false : Boolean.Parse(properties.separatePrivateKey.Value);
             string privateKeyPath = hasSeparatePrivateKey ? (properties.pathToPrivateKey == null || string.IsNullOrEmpty(properties.pathToPrivateKey.Value) ? null : properties.pathToPrivateKey.Value) : string.Empty;
@@ -51,14 +49,10 @@ namespace PEMStoreSSH
                 switch (config.Job.OperationType)
                 {
                     case AnyJobOperationType.Add:
-                        
-                        if (!config.Job.Overwrite)
-                        {
-                            if (pemStore.DoesStoreExist(config.Store.StorePath))
-                                throw new PEMException($"Certificate store already exists for {config.Store.StorePath}.  Check 'Overwrite' to overwrite the existing store.");
-                        }
+                        if (!pemStore.DoesStoreExist(config.Store.StorePath))
+                            throw new PEMException($"Certificate store does not exists for {config.Store.StorePath}.");
 
-                        pemStore.AddCertificateToStore(config.Job.EntryContents, config.Job.PfxPassword, config.Store.StorePassword);
+                        pemStore.AddCertificateToStore(config.Job.EntryContents, config.Job.Alias, config.Job.PfxPassword, config.Store.StorePassword, config.Job.Overwrite, hasPassword);
 
                         break;
 

@@ -12,7 +12,7 @@ namespace PEMStoreSSH
 {
     class PEMHandler : ICertificateFormatHandler
     {
-        string[] PrivateKeyDelimeters = new string[] { "-----BEGIN PRIVATE KEY-----", "-----BEGIN ENCRYPTED PRIVATE KEY-----" };
+        string[] PrivateKeyDelimeters = new string[] { "-----BEGIN PRIVATE KEY-----", "-----BEGIN ENCRYPTED PRIVATE KEY-----", "-----BEGIN RSA PRIVATE KEY-----" };
         string CertDelimBeg = "-----BEGIN CERTIFICATE-----";
         string CertDelimEnd = "-----END CERTIFICATE-----";
 
@@ -59,7 +59,7 @@ namespace PEMStoreSSH
             }
         }
 
-        public List<SSHFileInfo> CreateCertificatePacket(string certToAdd, string pfxPassword, string storePassword, bool hasSeparatePrivateKey)
+        public List<SSHFileInfo> CreateCertificatePacket(string certToAdd, string alias, string pfxPassword, string storePassword, bool hasSeparatePrivateKey)
         {
             List<SSHFileInfo> fileInfo = new List<SSHFileInfo>();
             byte[] certBytes = Convert.FromBase64String(certToAdd);
@@ -72,7 +72,7 @@ namespace PEMStoreSSH
             if (!string.IsNullOrEmpty(pfxPassword))
             {
                 PrivateKeyConverter converter = CSS.PKI.PrivateKeys.PrivateKeyConverterFactory.FromPKCS12(certBytes, pfxPassword);
-                byte[] privateKeyBytes = converter.ToPkcs8Blob(storePassword);
+                byte[] privateKeyBytes = converter.ToPkcs8Blob(pfxPassword);
                 string privateKeyPem = PemUtilities.DERToPEM(privateKeyBytes, PemUtilities.PemObjectType.EncryptedPrivateKey);
 
                 if (hasSeparatePrivateKey)
@@ -80,7 +80,8 @@ namespace PEMStoreSSH
                     fileInfo.Add(new SSHFileInfo()
                     {
                         FileType = SSHFileInfo.FileTypeEnum.Certificate,
-                        FileContents = certificatePem
+                        FileContents = certificatePem,
+                        Alias = alias
                     });
 
                     fileInfo.Add(new SSHFileInfo()
@@ -94,7 +95,8 @@ namespace PEMStoreSSH
                     fileInfo.Add(new SSHFileInfo()
                     {
                         FileType = SSHFileInfo.FileTypeEnum.Certificate,
-                        FileContents = certificatePem + "\n" + privateKeyPem
+                        FileContents = certificatePem + "\n" + privateKeyPem,
+                        Alias = alias
                     });
                 }
             }
@@ -103,17 +105,81 @@ namespace PEMStoreSSH
                 fileInfo.Add(new SSHFileInfo()
                 {
                     FileType = SSHFileInfo.FileTypeEnum.Certificate,
-                    FileContents = certificatePem
+                    FileContents = certificatePem,
+                    Alias = alias
                 });
             }
 
             return fileInfo;
         }
 
+        public void AddCertificateToStore(List<SSHFileInfo> files, string storePath, string privateKeyPath, SSHHandler ssh, PEMStore.ServerTypeEnum serverType, bool overwrite, bool hasPrivateKey)
+        {
+            SSHFileInfo certInfo = files.FirstOrDefault(p => p.FileType == SSHFileInfo.FileTypeEnum.Certificate);
+            X509Certificate2 x509Cert = new X509Certificate2(Encoding.ASCII.GetBytes(certInfo.FileContents));
+            
+            byte[] storebytes = serverType == PEMStore.ServerTypeEnum.Linux ? ssh.DownloadLinuxCertificateFile(storePath) : ssh.DownloadCertificateFile(storePath);
+            string storeContents = Encoding.ASCII.GetString(storebytes);
+            string storeContentsParsing = storeContents;
+
+            if (hasPrivateKey && string.IsNullOrEmpty(privateKeyPath))
+                storeContents = RemoveAllPrivateKeys(storeContents);
+
+            while (storeContentsParsing.Contains(CertDelimBeg))
+            { 
+                int certStart = storeContentsParsing.IndexOf(CertDelimBeg);
+                int certLength = storeContentsParsing.IndexOf(CertDelimEnd) + CertDelimEnd.Length - certStart;
+                string currCertFromStore = storeContentsParsing.Substring(certStart, certLength);
+                X509Certificate2 x509CurrCertFromStore = new X509Certificate2(Encoding.UTF8.GetBytes(currCertFromStore));
+
+                if (x509CurrCertFromStore.Thumbprint == certInfo.Alias || x509CurrCertFromStore.Thumbprint == x509Cert.Thumbprint)
+                {
+                    if (!overwrite)
+                        throw new PEMException("Certificate with this alias/thumbprint already exists in store.  Please select 'Overwrite' if you wish to replace this certificate.");
+
+                    storeContents = storeContents.Replace(currCertFromStore, certInfo.FileContents);
+                    break;
+                }
+
+                storeContentsParsing = storeContentsParsing.Substring(certStart + certLength - 1);
+            }
+
+            if (storeContents.IndexOf(certInfo.FileContents) == -1)
+                storeContents += ("\n" + certInfo.FileContents);
+
+            ssh.UploadCertificateFile(storePath, Encoding.ASCII.GetBytes(storeContents));
+
+            if (!string.IsNullOrEmpty(privateKeyPath) && files.Exists(p => p.FileType == SSHFileInfo.FileTypeEnum.PrivateKey))
+            {
+                SSHFileInfo keyInfo = files.FirstOrDefault(p => p.FileType == SSHFileInfo.FileTypeEnum.PrivateKey);
+                ssh.UploadCertificateFile(privateKeyPath, Encoding.ASCII.GetBytes(keyInfo.FileContents));
+            }
+        }
+
         public bool IsValidStore(string path, SSHHandler ssh)
         {
-            string result = ssh.RunCommand($"grep -i -- '{CertDelimBeg}' {path}", true);
+            string result = ssh.RunCommand($"grep -i -- '{CertDelimBeg}' path", true);
             return result.IndexOf(CertDelimBeg) > -1;
+        }
+
+
+
+        private string RemoveAllPrivateKeys(string storeContents)
+        {
+            foreach(string begDelim in PrivateKeyDelimeters)
+            {
+                string endDelim = begDelim.Replace("BEGIN", "END");
+
+                while (storeContents.Contains(begDelim))
+                {
+                    int keyStart = storeContents.IndexOf(begDelim);
+                    int keyLength = storeContents.IndexOf(endDelim) + endDelim.Length - keyStart;
+                    string key = storeContents.Substring(keyStart, keyLength);
+                    storeContents = storeContents.Replace(key, string.Empty);
+                }
+            }
+
+            return storeContents;
         }
     }
 }

@@ -122,6 +122,12 @@ namespace PEMStoreSSH
             }
         }
 
+        internal byte[] DownloadLinuxCertificateFile(string path)
+        {
+            string certs = RunCommand($"cat {path}", true);
+            return System.Text.Encoding.ASCII.GetBytes(certs);
+        }
+
         internal void RemoveCertificateFile(string path)
         {
             Logger.Debug($"RemoveCertificateFile: {path}");
