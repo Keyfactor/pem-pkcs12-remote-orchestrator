@@ -95,15 +95,15 @@ namespace PEMStoreSSH
             }
         }
 
-        internal void RemoveCertificate()
+        internal void RemoveCertificate(string alias)
         {
             try
             {
-                SSH.RemoveCertificateFile(StorePath);
+                CertificateHandler.RemoveCertificate(ServerType, StorePath, PrivateKeyPath, SSH, alias, String.IsNullOrEmpty(PrivateKeyPath));
             }
             catch (Exception ex)
             {
-                throw new PEMException($"Error attempting to remove certificate store {StorePath}.", ex);
+                throw new PEMException($"Error attempting to remove certificate from store {StorePath}.", ex);
             }
 
             if (!string.IsNullOrEmpty(PrivateKeyPath))

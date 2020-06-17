@@ -62,6 +62,11 @@ namespace PEMStoreSSH
                     string.IsNullOrEmpty(file.FileContents) ? file.FileContentBytes : Encoding.ASCII.GetBytes(file.FileContents));
         }
 
+        public void RemoveCertificate(PEMStore.ServerTypeEnum serverType, string storePath, string privateKeyPath, SSHHandler ssh, string alias, bool hasPrivateKey)
+        {
+            ssh.RemoveCertificateFile(storePath);
+        }
+
         public bool IsValidStore(string path, SSHHandler ssh)
         {
             return true;

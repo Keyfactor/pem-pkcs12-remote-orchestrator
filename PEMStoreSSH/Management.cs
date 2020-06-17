@@ -50,7 +50,7 @@ namespace PEMStoreSSH
                 {
                     case AnyJobOperationType.Add:
                         if (!pemStore.DoesStoreExist(config.Store.StorePath))
-                            throw new PEMException($"Certificate store does not exists for {config.Store.StorePath}.");
+                            throw new PEMException($"Certificate store {config.Store.StorePath} does not exist.");
 
                         pemStore.AddCertificateToStore(config.Job.EntryContents, config.Job.Alias, config.Job.PfxPassword, config.Store.StorePassword, config.Job.Overwrite, hasPassword);
 
@@ -58,10 +58,9 @@ namespace PEMStoreSSH
 
                     case AnyJobOperationType.Remove:
                         if (!pemStore.DoesStoreExist(config.Store.StorePath))
-                            throw new PEMException($"Certificate store {config.Store.StorePath} does not exist and cannot be removed.");
+                            throw new PEMException($"Certificate store {config.Store.StorePath} does not exist.");
 
-                        pemStore.RemoveCertificate();
-
+                        pemStore.RemoveCertificate(config.Job.Alias);
 
                         break;
 

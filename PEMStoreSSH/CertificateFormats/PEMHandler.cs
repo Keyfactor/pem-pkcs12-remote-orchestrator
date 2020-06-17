@@ -117,43 +117,22 @@ namespace PEMStoreSSH
         {
             SSHFileInfo certInfo = files.FirstOrDefault(p => p.FileType == SSHFileInfo.FileTypeEnum.Certificate);
             X509Certificate2 x509Cert = new X509Certificate2(Encoding.ASCII.GetBytes(certInfo.FileContents));
-            
-            byte[] storebytes = serverType == PEMStore.ServerTypeEnum.Linux ? ssh.DownloadLinuxCertificateFile(storePath) : ssh.DownloadCertificateFile(storePath);
-            string storeContents = Encoding.ASCII.GetString(storebytes);
-            string storeContentsParsing = storeContents;
 
-            if (hasPrivateKey && string.IsNullOrEmpty(privateKeyPath))
-                storeContents = RemoveAllPrivateKeys(storeContents);
-
-            while (storeContentsParsing.Contains(CertDelimBeg))
-            { 
-                int certStart = storeContentsParsing.IndexOf(CertDelimBeg);
-                int certLength = storeContentsParsing.IndexOf(CertDelimEnd) + CertDelimEnd.Length - certStart;
-                string currCertFromStore = storeContentsParsing.Substring(certStart, certLength);
-                X509Certificate2 x509CurrCertFromStore = new X509Certificate2(Encoding.UTF8.GetBytes(currCertFromStore));
-
-                if (x509CurrCertFromStore.Thumbprint == certInfo.Alias || x509CurrCertFromStore.Thumbprint == x509Cert.Thumbprint)
-                {
-                    if (!overwrite)
-                        throw new PEMException("Certificate with this alias/thumbprint already exists in store.  Please select 'Overwrite' if you wish to replace this certificate.");
-
-                    storeContents = storeContents.Replace(currCertFromStore, certInfo.FileContents);
-                    break;
-                }
-
-                storeContentsParsing = storeContentsParsing.Substring(certStart + certLength - 1);
-            }
-
-            if (storeContents.IndexOf(certInfo.FileContents) == -1)
-                storeContents += ("\n" + certInfo.FileContents);
-
-            ssh.UploadCertificateFile(storePath, Encoding.ASCII.GetBytes(storeContents));
+            AddRemoveCertificate(serverType, storePath, ssh, certInfo.Alias, x509Cert.Thumbprint, certInfo.FileContents, privateKeyPath, hasPrivateKey, overwrite, true);
 
             if (!string.IsNullOrEmpty(privateKeyPath) && files.Exists(p => p.FileType == SSHFileInfo.FileTypeEnum.PrivateKey))
             {
                 SSHFileInfo keyInfo = files.FirstOrDefault(p => p.FileType == SSHFileInfo.FileTypeEnum.PrivateKey);
                 ssh.UploadCertificateFile(privateKeyPath, Encoding.ASCII.GetBytes(keyInfo.FileContents));
             }
+        }
+
+        public void RemoveCertificate(PEMStore.ServerTypeEnum serverType, string storePath, string privateKeyPath, SSHHandler ssh, string alias, bool hasPrivateKey)
+        {
+            AddRemoveCertificate(serverType, storePath, ssh, alias, string.Empty, string.Empty, privateKeyPath, hasPrivateKey, false, false);
+
+            if (!string.IsNullOrEmpty(privateKeyPath))
+                ssh.UploadCertificateFile(privateKeyPath, new byte[] { });
         }
 
         public bool IsValidStore(string path, SSHHandler ssh)
@@ -163,6 +142,47 @@ namespace PEMStoreSSH
         }
 
 
+
+        private void AddRemoveCertificate(PEMStore.ServerTypeEnum serverType, string storePath, SSHHandler ssh, string alias, string thumbprint, string replacementCert, string privateKeyPath, bool hasPrivateKey, bool overwrite, bool isAdd)
+        {
+            bool certFound = false;
+
+            byte[] storebytes = serverType == PEMStore.ServerTypeEnum.Linux ? ssh.DownloadLinuxCertificateFile(storePath) : ssh.DownloadCertificateFile(storePath);
+            string storeContents = Encoding.ASCII.GetString(storebytes);
+
+            if (hasPrivateKey && string.IsNullOrEmpty(privateKeyPath))
+                storeContents = RemoveAllPrivateKeys(storeContents);
+
+            string storeContentsParsing = storeContents;
+
+            while (storeContentsParsing.Contains(CertDelimBeg))
+            {
+                int certStart = storeContentsParsing.IndexOf(CertDelimBeg);
+                int certLength = storeContentsParsing.IndexOf(CertDelimEnd) + CertDelimEnd.Length - certStart;
+                string currCertFromStore = storeContentsParsing.Substring(certStart, certLength);
+                X509Certificate2 x509CurrCertFromStore = new X509Certificate2(Encoding.UTF8.GetBytes(currCertFromStore));
+
+                if (x509CurrCertFromStore.Thumbprint == alias || x509CurrCertFromStore.Thumbprint == thumbprint)
+                {
+                    if (!overwrite && isAdd)
+                        throw new PEMException("Certificate with this alias/thumbprint already exists in store.  Please select 'Overwrite' if you wish to replace this certificate.");
+
+                    storeContents = storeContents.Replace(currCertFromStore, replacementCert);
+                    certFound = true;
+                    break;
+                }
+
+                storeContentsParsing = storeContentsParsing.Substring(certStart + certLength - 1);
+            }
+
+            if (!certFound && !isAdd)
+                throw new PEMException("Certificate with this alias/thumbprint does not exist in store.");
+
+            if (storeContents.IndexOf(replacementCert) == -1 && isAdd)
+                storeContents += ("\n" + replacementCert);
+
+            ssh.UploadCertificateFile(storePath, Encoding.ASCII.GetBytes(storeContents));
+        }
 
         private string RemoveAllPrivateKeys(string storeContents)
         {

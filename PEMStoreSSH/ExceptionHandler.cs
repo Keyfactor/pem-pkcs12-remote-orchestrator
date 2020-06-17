@@ -12,7 +12,7 @@ namespace PEMStoreSSH
         {
             message += ex.Message + Environment.NewLine;
             if (ex.InnerException != null)
-                message += FlattenExceptionMessages(ex.InnerException, message);
+                message = FlattenExceptionMessages(ex.InnerException, message);
 
             return message;
         }
