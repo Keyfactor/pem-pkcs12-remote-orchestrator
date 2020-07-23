@@ -1,30 +1,43 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Text;
 
 using Renci.SshNet;
-using CSS.Common.Logging;
 
-namespace PEMStoreSSH
+namespace PEMStoreSSH.RemoteHandlers
 {
-    class SSHHandler : LoggingClientBase
+    class SSHHandler : BaseRemoteHandler
     {
-        public string Server { get; set; }
-        public string ServerLogin { get; set; }
-        public string ServerPassword { get; set; }
+        private ConnectionInfo Connection { get; set; }
 
         internal SSHHandler(string server, string serverLogin, string serverPassword)
         {
+            if (string.IsNullOrEmpty(server))
+                throw new PEMException("Blank or missing server name for server orchestration.");
+            if (string.IsNullOrEmpty(serverLogin))
+                throw new PEMException("Blank or missing username for server SSH login.");
+            if (string.IsNullOrEmpty(serverPassword))
+                throw new PEMException("Blank or missing password or SSH key for server SSH login.");
+
+
             Server = server;
-            ServerLogin = serverLogin;
-            ServerPassword = serverPassword;
+
+            List<AuthenticationMethod> authenticationMethods = new List<AuthenticationMethod>();
+            if (serverPassword.Length < PASSWORD_LENGTH_MAX)
+                authenticationMethods.Add(new PasswordAuthenticationMethod(serverLogin, serverPassword));
+            else
+                authenticationMethods.Add(new PrivateKeyAuthenticationMethod(serverLogin, new PrivateKeyFile[] { new PrivateKeyFile(new MemoryStream(Encoding.ASCII.GetBytes(ReplaceSpacesWithLF(serverPassword)))) }));
+
+            Connection = new ConnectionInfo(server, serverLogin, authenticationMethods.ToArray());
         }
 
-        internal string RunCommand(string commandText, bool withSudo)
+        public override string RunCommand(string commandText, object[] arguments, bool withSudo, string[] passwordsToMaskInLog)
         {
             Logger.Debug($"RunCommand: {Server}");
 
             string sudo = $"echo -e '\n' | sudo -S ";
-            using (SshClient client = new SshClient(Server, ServerLogin, ServerPassword))
+            using (SshClient client = new SshClient(Connection))
             {
                 try
                 {
@@ -33,20 +46,20 @@ namespace PEMStoreSSH
                     if (withSudo)
                         commandText = sudo + commandText;
 
-                    string displayCommand = commandText.Replace(ServerPassword, "[PASSWORD]");
+                    string displayCommand = commandText;
+                    if (passwordsToMaskInLog != null)
+                    {
+                        foreach (string password in passwordsToMaskInLog)
+                            displayCommand = displayCommand.Replace(password, PASSWORD_MASK_VALUE);
+                    }
 
                     using (SshCommand command = client.CreateCommand($"{commandText}"))
                     {
                         Logger.Debug($"RunCommand: {displayCommand}");
                         command.Execute();
-                        Logger.Debug($"SSH Results: {displayCommand} {command.Result}");
-                        Logger.Debug($"SSH Error: {displayCommand} {command.Error}");
+                        Logger.Debug($"SSH Results: {displayCommand}::: {command.Result}::: {command.Error}");
                         return command.Result;
                     }
-                }
-                catch (Exception ex)
-                {
-                    throw ex;
                 }
                 finally
                 {
@@ -55,12 +68,11 @@ namespace PEMStoreSSH
             }
         }
 
-        internal bool DoesFileExist(string path)
+        public override bool DoesFileExist(string path)
         {
             Logger.Debug($"DoesFileExist: {path}");
 
-
-            using (SftpClient client = new SftpClient(Server, ServerLogin, ServerPassword))
+            using (SftpClient client = new SftpClient(Connection))
             {
                 try
                 {
@@ -77,11 +89,11 @@ namespace PEMStoreSSH
             }
         }
 
-        internal void UploadCertificateFile(string path, byte[] certBytes)
+        public override void UploadCertificateFile(string path, byte[] certBytes)
         {
             Logger.Debug($"UploadCertificateFile: {path}");
 
-            using (SftpClient client = new SftpClient(Server, ServerLogin, ServerPassword))
+            using (SftpClient client = new SftpClient(Connection))
             {
                 try
                 {
@@ -99,11 +111,11 @@ namespace PEMStoreSSH
             }
         }
 
-        internal byte[] DownloadCertificateFile(string path)
+        public override byte[] DownloadCertificateFile(string path, bool hasBinaryContent)
         {
             Logger.Debug($"DownloadCertificateFile: {path}");
 
-            using (SftpClient client = new SftpClient(Server, ServerLogin, ServerPassword))
+            using (SftpClient client = new SftpClient(Connection))
             {
                 try
                 {
@@ -122,17 +134,11 @@ namespace PEMStoreSSH
             }
         }
 
-        internal byte[] DownloadLinuxCertificateFile(string path)
-        {
-            string certs = RunCommand($"cat {path}", true);
-            return System.Text.Encoding.ASCII.GetBytes(certs);
-        }
-
-        internal void RemoveCertificateFile(string path)
+        public override void RemoveCertificateFile(string path)
         {
             Logger.Debug($"RemoveCertificateFile: {path}");
 
-            using (SftpClient client = new SftpClient(Server, ServerLogin, ServerPassword))
+            using (SftpClient client = new SftpClient(Connection))
             {
                 try
                 {
@@ -144,6 +150,18 @@ namespace PEMStoreSSH
                     client.Disconnect();
                 }
             }
+        }
+
+        public override void CreateEmptyStoreFile(string path)
+        {
+            RunCommand($"touch {path}", null, false, null);
+            //using sudo will create as root. set useSudo to false 
+            //to ensure ownership is with the credentials configued in the platform
+        }
+
+        private string ReplaceSpacesWithLF(string privateKey)
+        {
+            return privateKey.Replace(" RSA PRIVATE ", "^^^").Replace(" ", System.Environment.NewLine).Replace("^^^", " RSA PRIVATE ");
         }
 
         private string FormatFTPPath(string path)

@@ -32,11 +32,18 @@ namespace PEMStoreSSH
 
             try
             {
+                ApplicationSettings.Initialize(this.GetType().Assembly.Location);
+
                 dynamic properties = JsonConvert.DeserializeObject(config.Job.Properties.ToString());
                 string[] directoriesToSearch = properties.dirs.Value.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
                 string[] extensionsToSearch = properties.extensions.Value.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
                 string[] ignoredDirs = properties.ignoreddirs.Value.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
                 bool isP12 = (bool)properties.compatibility.Value;
+
+                if (directoriesToSearch.Length == 0)
+                    throw new PEMException("Blank or missing search directories for Discovery.");
+                if (extensionsToSearch.Length == 0)
+                    throw new PEMException("Blank or missing search extensions for Discovery.");
 
                 PEMStore pemStore = new PEMStore(config.Store.ClientMachine, config.Server.Username, config.Server.Password, directoriesToSearch[0].Substring(0, 1) == "/" ? PEMStore.ServerTypeEnum.Linux : PEMStore.ServerTypeEnum.Windows,
                     isP12 ? PEMStore.FormatTypeEnum.PKCS12 : PEMStore.FormatTypeEnum.PEM);

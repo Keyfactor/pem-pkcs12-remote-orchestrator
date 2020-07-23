@@ -81,6 +81,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ApplicationSettings.cs" />
     <Compile Include="CertificateFormats\ICertificateFormatHandler.cs" />
     <Compile Include="CertificateFormats\PEMHandler.cs" />
     <Compile Include="CertificateFormats\PKCS12Handler.cs" />
@@ -90,13 +91,21 @@
     <Compile Include="Inventory.cs" />
     <Compile Include="PEMStore.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RemoteHandlers\BaseRemoteHandler.cs" />
+    <Compile Include="RemoteHandlers\IRemoteHandler.cs" />
+    <Compile Include="RemoteHandlers\WinRMHandler.cs" />
     <Compile Include="SSHFileInfo.cs" />
-    <Compile Include="SSHHandler.cs" />
+    <Compile Include="RemoteHandlers\SSHHandler.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="config.json" />
     <None Include="Doc\PEM SSH AnyAgent Configuration.docx" />
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>echo F | xcopy "$(ProjectDir)config.json" "$(ProjectDir)bin\$(ConfigurationName)\config.json" /Y</PostBuildEvent>
+  </PropertyGroup>
 </Project>

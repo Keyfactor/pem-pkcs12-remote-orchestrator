@@ -4,14 +4,16 @@ using System.IO;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 
-using Org.BouncyCastle.Crypto;
-using Org.BouncyCastle.OpenSsl;
 using Org.BouncyCastle.Pkcs;
+
+using PEMStoreSSH.RemoteHandlers;
 
 namespace PEMStoreSSH
 {
     class PKCS12Handler : ICertificateFormatHandler
     {
+        public bool HasBinaryContent { get { return true; } }
+
         public bool HasPrivateKey(byte[] certificateBytes, byte[] privateKeyBytes)
         {
             return true;
@@ -22,7 +24,28 @@ namespace PEMStoreSSH
             try
             {
                 X509Certificate2Collection certCollection = new X509Certificate2Collection();
-                certCollection.Import(binaryCertificates, storePassword, X509KeyStorageFlags.Exportable);
+
+                if (binaryCertificates.Length > 0)
+                {
+                    certCollection.Import(binaryCertificates, storePassword, X509KeyStorageFlags.Exportable);
+
+                    X509Certificate2 certWithKey = null;
+                    foreach (X509Certificate2 cert in certCollection)
+                    {
+                        if (cert.HasPrivateKey)
+                        {
+                            certWithKey = cert;
+                            break;
+                        }
+                    }
+
+                    if (certWithKey != null)
+                    {
+                        certCollection.Remove(certWithKey);
+                        certCollection.Insert(0, certWithKey);
+                    }
+                }
+
                 return certCollection;
             }
             catch (Exception ex)
@@ -55,19 +78,19 @@ namespace PEMStoreSSH
             return fileInfo;
         }
 
-        public void AddCertificateToStore(List<SSHFileInfo> files, string storePath, string privateKeyPath, SSHHandler ssh, PEMStore.ServerTypeEnum serverType, bool overwrite, bool hasPrivateKey)
+        public void AddCertificateToStore(List<SSHFileInfo> files, string storePath, string privateKeyPath, IRemoteHandler ssh, PEMStore.ServerTypeEnum serverType, bool overwrite, bool hasPrivateKey)
         {
             foreach (SSHFileInfo file in files)
                 ssh.UploadCertificateFile(file.FileType == SSHFileInfo.FileTypeEnum.Certificate ? storePath : privateKeyPath,
                     string.IsNullOrEmpty(file.FileContents) ? file.FileContentBytes : Encoding.ASCII.GetBytes(file.FileContents));
         }
 
-        public void RemoveCertificate(PEMStore.ServerTypeEnum serverType, string storePath, string privateKeyPath, SSHHandler ssh, string alias, bool hasPrivateKey)
+        public void RemoveCertificate(PEMStore.ServerTypeEnum serverType, string storePath, string privateKeyPath, IRemoteHandler ssh, string alias, bool hasPrivateKey)
         {
-            ssh.RemoveCertificateFile(storePath);
+            ssh.RunCommand($"echo -n '' > {storePath}", null, ApplicationSettings.UseSudo, null);
         }
 
-        public bool IsValidStore(string path, SSHHandler ssh)
+        public bool IsValidStore(string path, PEMStore.ServerTypeEnum serverType, IRemoteHandler ssh)
         {
             return true;
         }

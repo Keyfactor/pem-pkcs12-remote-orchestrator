@@ -29,16 +29,23 @@ namespace PEMStoreSSH
 
         public AnyJobCompleteInfo processJob(AnyJobConfigInfo config, SubmitInventoryUpdate submitInventory, SubmitEnrollmentRequest submitEnrollmentRequest, SubmitDiscoveryResults sdr)
         {
-            Logger.Debug($"Begin Inventory...");
+            Logger.Debug($"Begin Inventory.......");
 
             List<AgentCertStoreInventoryItem> inventoryItems = new List<AgentCertStoreInventoryItem>();
             X509Certificate2Collection certificates = new X509Certificate2Collection();
-
             try
             {
+                ApplicationSettings.Initialize(this.GetType().Assembly.Location);
+
                 dynamic properties = JsonConvert.DeserializeObject(config.Store.Properties.ToString());
                 bool hasSeparatePrivateKey = properties.separatePrivateKey == null || string.IsNullOrEmpty(properties.separatePrivateKey.Value) ? false : Boolean.Parse(properties.separatePrivateKey.Value);
                 string privateKeyPath = hasSeparatePrivateKey ? (properties.pathToPrivateKey == null || string.IsNullOrEmpty(properties.pathToPrivateKey.Value) ? null : properties.pathToPrivateKey.Value) : string.Empty;
+
+                if (properties.type.Value == null ||  string.IsNullOrEmpty(properties.type.Value))
+                    throw new PEMException("Mising certificate store Type.  Please ensure store is defined as either PEM or PKCS12.");
+                if (hasSeparatePrivateKey && string.IsNullOrEmpty(privateKeyPath))
+                    throw new PEMException("Certificate store is set has having a separate private key but no private key path is specified in the store definition.");
+
 
                 PEMStore pemStore = new PEMStore(config.Store.ClientMachine, config.Server.Username, config.Server.Password, config.Store.StorePath, config.Store.StorePassword, Enum.Parse(typeof(PEMStore.FormatTypeEnum), properties.type.Value), privateKeyPath);
 

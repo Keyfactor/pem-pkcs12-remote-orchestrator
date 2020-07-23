@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using System.Text;
+
+using PEMStoreSSH.RemoteHandlers;
 
 namespace PEMStoreSSH
 {
@@ -30,7 +30,7 @@ namespace PEMStoreSSH
         private string StorePassword { get; set; }
         private string PrivateKeyPath { get; set; }
         private ICertificateFormatHandler CertificateHandler { get; set; }
-        private SSHHandler SSH { get; set; }
+        private IRemoteHandler SSH { get; set; }
         public ServerTypeEnum ServerType { get; set; }
 
 
@@ -45,7 +45,10 @@ namespace PEMStoreSSH
             CertificateHandler = GetCertificateHandler(formatType);
             ServerType = StorePath.Substring(0, 1) == "/" ? ServerTypeEnum.Linux : ServerTypeEnum.Windows;
 
-           SSH = new SSHHandler(Server, ServerId, ServerPassword);
+            if (ServerType == ServerTypeEnum.Linux)
+                SSH = new SSHHandler(Server, ServerId, ServerPassword);
+            else
+                SSH = new WinRMHandler(Server, ServerId, ServerPassword);
         }
 
         internal PEMStore(string server, string serverId, string serverPassword, ServerTypeEnum serverType, FormatTypeEnum formatType)
@@ -56,7 +59,10 @@ namespace PEMStoreSSH
             ServerType = serverType;
             CertificateHandler = GetCertificateHandler(formatType);
 
-            SSH = new SSHHandler(Server, ServerId, ServerPassword);
+            if (ServerType == ServerTypeEnum.Linux)
+                SSH = new SSHHandler(Server, ServerId, ServerPassword);
+            else
+                SSH = new WinRMHandler(Server, ServerId, ServerPassword);
         }
 
         internal bool DoesStoreExist(string path)
@@ -75,14 +81,14 @@ namespace PEMStoreSSH
             {
                 containsPrivateKey = false;
 
-                byte[] certContents = ServerType == ServerTypeEnum.Linux ? SSH.DownloadLinuxCertificateFile(StorePath) : SSH.DownloadCertificateFile(StorePath);
+                byte[] certContents = SSH.DownloadCertificateFile(StorePath, CertificateHandler.HasBinaryContent);
 
                 X509Certificate2Collection certs = CertificateHandler.RetrieveCertificates(certContents, storePassword);
                 if (certs.Count >= 1)
                 {
                     byte[] privateKeyContentBytes = null;
                     if (!string.IsNullOrEmpty(PrivateKeyPath))
-                        privateKeyContentBytes = ServerType == ServerTypeEnum.Linux ? SSH.DownloadLinuxCertificateFile(PrivateKeyPath) : SSH.DownloadCertificateFile(PrivateKeyPath);
+                        privateKeyContentBytes = SSH.DownloadCertificateFile(PrivateKeyPath, CertificateHandler.HasBinaryContent);
 
                     containsPrivateKey = CertificateHandler.HasPrivateKey(certContents, privateKeyContentBytes);
                 }
@@ -111,6 +117,7 @@ namespace PEMStoreSSH
                 try
                 {
                     SSH.RemoveCertificateFile(PrivateKeyPath);
+                    SSH.CreateEmptyStoreFile(PrivateKeyPath);
                 }
                 catch (Exception ex)
                 {
@@ -134,14 +141,12 @@ namespace PEMStoreSSH
 
         internal bool IsValidStore(string path)
         {
-            return CertificateHandler.IsValidStore(path, SSH);
+            return CertificateHandler.IsValidStore(path, ServerType, SSH);
         }
 
-        internal void CreateBlankCertificateStore(string path)
+        internal void CreateEmptyStoreFile(string path)
         {
-            SSH.RunCommand($"touch {path}",false);
-            //using sudo will create as root. set useSudo to false 
-            //to ensure ownership is with the credentials configued in the platform
+            SSH.CreateEmptyStoreFile(path);
         }
 
         private List<string> FindStoresLinux(string[] paths, string[] extensions)
@@ -164,10 +169,10 @@ namespace PEMStoreSSH
 
                 string result = string.Empty;
                 if (extensions.Any(p => p.ToLower() != NO_EXTENSION))
-                    result = SSH.RunCommand(command, true);
+                    result = SSH.RunCommand(command, null, ApplicationSettings.UseSudo, null);
 
                 if (searchNoExtension)
-                    result += ('\n' + SSH.RunCommand(commandNoExt, true));
+                    result += ('\n' + SSH.RunCommand(commandNoExt, null, ApplicationSettings.UseSudo, null));
 
                 return (result.Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries)).ToList();
             }
@@ -184,8 +189,8 @@ namespace PEMStoreSSH
 
             foreach (string path in paths)
             {
-                string command = $"cd {path} && dir {concatExtensions} /s /b ";
-                string result = SSH.RunCommand(command, false);
+                string command = $"cd {path} | cmd /r dir {concatExtensions} /s /b ";
+                string result = SSH.RunCommand(command, null, false, null);
                 results.AddRange(result.Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries).ToList());
             }
 

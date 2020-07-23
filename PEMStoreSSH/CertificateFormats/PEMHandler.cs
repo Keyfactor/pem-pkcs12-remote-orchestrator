@@ -8,6 +8,8 @@ using System.Security.Cryptography.X509Certificates;
 using CSS.PKI.PEM;
 using CSS.PKI.PrivateKeys;
 
+using PEMStoreSSH.RemoteHandlers;
+
 namespace PEMStoreSSH
 {
     class PEMHandler : ICertificateFormatHandler
@@ -15,6 +17,8 @@ namespace PEMStoreSSH
         string[] PrivateKeyDelimeters = new string[] { "-----BEGIN PRIVATE KEY-----", "-----BEGIN ENCRYPTED PRIVATE KEY-----", "-----BEGIN RSA PRIVATE KEY-----" };
         string CertDelimBeg = "-----BEGIN CERTIFICATE-----";
         string CertDelimEnd = "-----END CERTIFICATE-----";
+
+        public bool HasBinaryContent { get { return false; } }
 
         public bool HasPrivateKey(byte[] certificateBytes, byte[] privateKeyBytes)
         {
@@ -113,7 +117,7 @@ namespace PEMStoreSSH
             return fileInfo;
         }
 
-        public void AddCertificateToStore(List<SSHFileInfo> files, string storePath, string privateKeyPath, SSHHandler ssh, PEMStore.ServerTypeEnum serverType, bool overwrite, bool hasPrivateKey)
+        public void AddCertificateToStore(List<SSHFileInfo> files, string storePath, string privateKeyPath, IRemoteHandler ssh, PEMStore.ServerTypeEnum serverType, bool overwrite, bool hasPrivateKey)
         {
             SSHFileInfo certInfo = files.FirstOrDefault(p => p.FileType == SSHFileInfo.FileTypeEnum.Certificate);
             X509Certificate2 x509Cert = new X509Certificate2(Encoding.ASCII.GetBytes(certInfo.FileContents));
@@ -127,7 +131,7 @@ namespace PEMStoreSSH
             }
         }
 
-        public void RemoveCertificate(PEMStore.ServerTypeEnum serverType, string storePath, string privateKeyPath, SSHHandler ssh, string alias, bool hasPrivateKey)
+        public void RemoveCertificate(PEMStore.ServerTypeEnum serverType, string storePath, string privateKeyPath, IRemoteHandler ssh, string alias, bool hasPrivateKey)
         {
             AddRemoveCertificate(serverType, storePath, ssh, alias, string.Empty, string.Empty, privateKeyPath, hasPrivateKey, false, false);
 
@@ -135,19 +139,20 @@ namespace PEMStoreSSH
                 ssh.UploadCertificateFile(privateKeyPath, new byte[] { });
         }
 
-        public bool IsValidStore(string path, SSHHandler ssh)
+        public bool IsValidStore(string path, PEMStore.ServerTypeEnum serverType, IRemoteHandler ssh)
         {
-            string result = ssh.RunCommand($"grep -i -- '{CertDelimBeg}' path", true);
+            string command = serverType == PEMStore.ServerTypeEnum.Linux ? $"grep -i -- '{CertDelimBeg}' {path}" : $"cmd /r findstr /i /l /c:\"{CertDelimBeg}\" {path}";
+            string result = ssh.RunCommand(command, null, ApplicationSettings.UseSudo, null);
             return result.IndexOf(CertDelimBeg) > -1;
         }
 
 
 
-        private void AddRemoveCertificate(PEMStore.ServerTypeEnum serverType, string storePath, SSHHandler ssh, string alias, string thumbprint, string replacementCert, string privateKeyPath, bool hasPrivateKey, bool overwrite, bool isAdd)
+        private void AddRemoveCertificate(PEMStore.ServerTypeEnum serverType, string storePath, IRemoteHandler ssh, string alias, string thumbprint, string replacementCert, string privateKeyPath, bool hasPrivateKey, bool overwrite, bool isAdd)
         {
             bool certFound = false;
 
-            byte[] storebytes = serverType == PEMStore.ServerTypeEnum.Linux ? ssh.DownloadLinuxCertificateFile(storePath) : ssh.DownloadCertificateFile(storePath);
+            byte[] storebytes = ssh.DownloadCertificateFile(storePath, HasBinaryContent);
             string storeContents = Encoding.ASCII.GetString(storebytes);
 
             if (hasPrivateKey && string.IsNullOrEmpty(privateKeyPath))
