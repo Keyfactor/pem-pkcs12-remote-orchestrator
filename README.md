@@ -8,7 +8,7 @@ The PEM SSH AnyAgent allows a user to discover, inventory, and manage (both add 
 
 In Keyfactor Command create a new Certificate Store Type similar to the one below:
 
-![](RackMultipart20200730-4-qjklyx_html_c8bd159128b518d0.png)
+![](Images/Image1.png)
 
 - **Name** – Required. The display name of the new Certificate Store Type
 - **Short Name** – Required. **MUST** be &quot;PEM-SSH&quot;
@@ -22,53 +22,53 @@ In Keyfactor Command create a new Certificate Store Type similar to the one belo
 - **Parameters** – Three custom parameters are used for this store type. They are:
   - **Type (Name MUST be &quot;type&quot;):**
 
-![](RackMultipart20200730-4-qjklyx_html_f5efa050c3251c2d.png)
+![](Images/Image2.png)
 
   - **Separate Private Key File (Name MUST be &quot;separatePrivateKey:** Only applicable for Type=PEM stores, select if the store will contain a private key but the private key will reside in an separate file somewhere else on the server
 
-![](RackMultipart20200730-4-qjklyx_html_ad9ee858408d6a4.png)
+![](Images/Image3.png)
 
   - **Path to Private Key File (Name MUST be &quot;pathtoPrivateKey&quot;):** Only applicable for Type=PEM stores. If the PEM certificate store has a separate private key file, this is the FULL PATH and file name where the private key resides. File paths on Linux servers will always begin with a &quot;/&quot;. Windows servers will always begin with the drive letter, colon, and backslash, such as &quot;c:\&quot;.
 
-![](RackMultipart20200730-4-qjklyx_html_c3feaa3017c3efb0.png)
+![](Images/Image4.png)
 
 **2. Register the PEM SSH AnyAgent with Keyfactor**
 
 Open the Keyfactor Windows Agent Configuration Wizard and perform the tasks as illustrated below:
 
-![](RackMultipart20200730-4-qjklyx_html_4f217159eb6c94dd.png)
+![](Images/Image5.png)
 
-- Click **\&lt;Next\&gt;**
+- Click **\<Next\>**
 
-![](RackMultipart20200730-4-qjklyx_html_c9294cce724bb712.png)
+![](Images/Image6.png)
 
-- If you have configured the agent service previously, you should be able to skip to just click **\&lt;Next\&gt;.** Otherwise, enter the service account Username and Password you wish to run the Keyfactor Windows Agent Service under, click **\&lt;Update Windows Service Account\&gt;** and click **\&lt;Next\&gt;.**
+- If you have configured the agent service previously, you should be able to skip to just click **\<Next\>.** Otherwise, enter the service account Username and Password you wish to run the Keyfactor Windows Agent Service under, click **\<Update Windows Service Account\>** and click **\<Next\>.**
 
-![](RackMultipart20200730-4-qjklyx_html_11d77ccffc553739.png)
+![](Images/Image7.png)
 
-- If you have configured the agent service previously, you should be able to skip to just re-enter the password to the service account the agent service will run under, click **\&lt;Validate Keyfactor Connection\&gt;** and then **\&lt;Next\&gt;.**
+- If you have configured the agent service previously, you should be able to skip to just re-enter the password to the service account the agent service will run under, click **\<Validate Keyfactor Connection\>** and then **\<Next\>.**
 
-![](RackMultipart20200730-4-qjklyx_html_425bdca5ef540bb8.png)
+![](Images/Image8.png)
 
-- Select the agent you are adding capabilities for (in this case, PEM SSH, and also select the specific capabilities (Discovery, Inventory and Management in this example). Click **\&lt;Next\&gt;**.
+- Select the agent you are adding capabilities for (in this case, PEM SSH, and also select the specific capabilities (Discovery, Inventory and Management in this example). Click **\<Next\>**.
 
-![](RackMultipart20200730-4-qjklyx_html_30739ddaac937d3d.png)
+![](Images/Image9.png)
 
-- For agent configuration purposes, this screen can be skipped by clicking **\&lt;Next\&gt;**.
+- For agent configuration purposes, this screen can be skipped by clicking **\<Next\>**.
 
-![](RackMultipart20200730-4-qjklyx_html_8759a7f8a53b1c4c.png)
+![](Images/Image10.png)
 
-- For each AnyAgent implementation, check **Load assemblies containing extension modules from other location** , browse to the location of the compiled AnyAgent dll, and click **\&lt;Validate Capabilities\&gt;**. Once all AnyAgents have been validated, click **\&lt;Apply Configuration\&gt;**.
+- For each AnyAgent implementation, check **Load assemblies containing extension modules from other location** , browse to the location of the compiled AnyAgent dll, and click **\<Validate Capabilities\>**. Once all AnyAgents have been validated, click **\<Apply Configuration\>**.
 
-![](RackMultipart20200730-4-qjklyx_html_e5aba10f6426cbef.png)
+![](Images/Image11.png)
 
 - If the Keyfactor Agent Configuration Wizard configured everything correctly, you should see the dialog above.
 
 **3a. (Optional) Create a PEM SSH Certificate Store within Keyfactor Command**
 
-If you choose to manually create a PEM SSH store In Keyfactor Command rather than running a Discovery job to automatically find the store, you can navigate to Certificate Locations =\&gt; Certificate Stores within Keyfactor Command to add the store. Below are the values that should be entered.
+If you choose to manually create a PEM SSH store In Keyfactor Command rather than running a Discovery job to automatically find the store, you can navigate to Certificate Locations =\> Certificate Stores within Keyfactor Command to add the store. Below are the values that should be entered.
 
-![](RackMultipart20200730-4-qjklyx_html_87358fe96a8e547c.png)
+![](Images/Image12.png)
 
 - **Category** – Required. The PEM SSH type name must be selected.
 - **Container** – Optional. Select a container if utilized.
@@ -85,9 +85,9 @@ If you choose to manually create a PEM SSH store In Keyfactor Command rather tha
 
 Rather than manually creating PEM SSH certificate stores, you can schedule a Discovery job to search an orchestrated server and find them.
 
-First, in Keyfactor Command navigate to Certificate Locations =\&gt; Certificate Stores. Select the Discover tab and then the Schedule button. Complete the dialog and click Done to schedule.
+First, in Keyfactor Command navigate to Certificate Locations =\> Certificate Stores. Select the Discover tab and then the Schedule button. Complete the dialog and click Done to schedule.
 
-![](RackMultipart20200730-4-qjklyx_html_5ca2494093f51b2f.png)
+![](Images/Image13.png)
 
 - **Category** – Required. The PEM SSH type name must be selected.
 - **Orchestrator** – Select the orchestrator you wish to use to manage this store
