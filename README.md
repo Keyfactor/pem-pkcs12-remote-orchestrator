@@ -2,9 +2,9 @@
 
 **Overview**
 
-The PEM SSH AnyAgent allows a user to discover, inventory, and manage (both add and remove) PEM and PKCS12 based certificate stores on both Windows and Linux servers. The communication between the orchestrator agent and the server being orchestrated is handled using SSH for Linux orchestrated servers and WinRM for Windows orchestrated servers.
+The PEM_PKCS12 AnyAgent allows a user to discover, inventory, and manage (both add and remove) PEM and PKCS12 based certificate stores on both Windows and Linux servers. The communication between the orchestrator agent and the server being orchestrated is handled using SSH for Linux orchestrated servers and WinRM for Windows orchestrated servers.
 
-**1. Create the New Certificate Store Type for the New PEM SSH AnyAgent**
+**1. Create the New Certificate Store Type for the New PEM_PKCS12 AnyAgent**
 
 In Keyfactor Command create a new Certificate Store Type similar to the one below:
 
@@ -32,7 +32,7 @@ In Keyfactor Command create a new Certificate Store Type similar to the one belo
 
 ![](Images/Image4.png)
 
-**2. Register the PEM SSH AnyAgent with Keyfactor**
+**2. Register the PEM_PKCS12 AnyAgent with Keyfactor**
 
 Open the Keyfactor Windows Agent Configuration Wizard and perform the tasks as illustrated below:
 
@@ -64,9 +64,9 @@ Open the Keyfactor Windows Agent Configuration Wizard and perform the tasks as i
 
 - If the Keyfactor Agent Configuration Wizard configured everything correctly, you should see the dialog above.
 
-**3a. (Optional) Create a PEM SSH Certificate Store within Keyfactor Command**
+**3a. (Optional) Create a PEM_PKCS12 Certificate Store within Keyfactor Command**
 
-If you choose to manually create a PEM SSH store In Keyfactor Command rather than running a Discovery job to automatically find the store, you can navigate to Certificate Locations =\> Certificate Stores within Keyfactor Command to add the store. Below are the values that should be entered.
+If you choose to manually create a PEM_PKCS12 store In Keyfactor Command rather than running a Discovery job to automatically find the store, you can navigate to Certificate Locations =\> Certificate Stores within Keyfactor Command to add the store. Below are the values that should be entered.
 
 ![](Images/Image12.png)
 
@@ -81,9 +81,9 @@ If you choose to manually create a PEM SSH store In Keyfactor Command rather tha
 - **Store Password** – Set the store password or set no password after clicking the supplied button. This option will generally only be set to a password for PKCS12 files containing a private key.
 - **Inventory Schedule** – Set a schedule for running Inventory jobs or none, if you choose not to schedule Inventory at this time.
 
-**3b. (Optional) Schedule a PEM SSH Discovery Job**
+**3b. (Optional) Schedule a PEM_PKCS12 Discovery Job**
 
-Rather than manually creating PEM SSH certificate stores, you can schedule a Discovery job to search an orchestrated server and find them.
+Rather than manually creating PEM_PKCS12 certificate stores, you can schedule a Discovery job to search an orchestrated server and find them.
 
 First, in Keyfactor Command navigate to Certificate Locations =\> Certificate Stores. Select the Discover tab and then the Schedule button. Complete the dialog and click Done to schedule.
 
@@ -102,11 +102,11 @@ First, in Keyfactor Command navigate to Certificate Locations =\> Certificate St
 
 Once the Discovery job has completed, a list of PEM/PKCS12 store locations should show in the Certificate Stores Discovery tab in Keyfactor Command. Right click on a store and select Approve to bring up a dialog that will ask for the Keystore Password. Enter the store password, click Save, and the Certificate Store should now show up in the list of stores in the Certificate Stores tab.
 
-From the Certificate Store list, edit the newly added store to enter the PEM SSH store type (PEM or PKCS12), whether the store has a separate private key file, and if necessary, the FULL PATH to that file. **NOTE:** You will not be able to successfully process an Inventory or Management job for this store until this has been completed.
+From the Certificate Store list, edit the newly added store to enter the PEM_PKCS12 store type (PEM or PKCS12), whether the store has a separate private key file, and if necessary, the FULL PATH to that file. **NOTE:** You will not be able to successfully process an Inventory or Management job for this store until this has been completed.
 
 **4. Update Settings in config.json**
 
-The PEM SSH AnyAgent uses a JSON config file:
+The PEM_PKCS12 AnyAgent uses a JSON config file:
 
 {
 
