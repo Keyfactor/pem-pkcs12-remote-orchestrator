@@ -72,7 +72,7 @@ If you choose to manually create a PEM_PKCS12 store In Keyfactor Command rather 
 
 - **Category** – Required. The PEM SSH type name must be selected.
 - **Container** – Optional. Select a container if utilized.
-- **Client Machine &amp; Credentials** – Required. The server name or IP Address and login credentials for the server where the Certificate Store is located.
+- **Client Machine &amp; Credentials** – Required. The server name or IP Address and login credentials for the server where the Certificate Store is located.When setting up a Windows server, the format of the machine name must be – [http://_ServerName_:5985](http://ServerName:5985/), where &quot;5985&quot; is the WinRM port number. 5985 is the standard, but if your organization uses a different, use that.
 - **Store Path** – Required. The FULL PATH and file name of the PEM/PKCS12 store being managed. File paths on Linux servers will always begin with a &quot;/&quot;. Windows servers will always begin with the drive letter, colon, and backslash, such as &quot;c:\&quot;.
 - **Type** – Select either PEM or PKCS12
 - **Separate Private Key File** – Check if the store has a separate private key file.
@@ -91,7 +91,7 @@ First, in Keyfactor Command navigate to Certificate Locations =\> Certificate St
 
 - **Category** – Required. The PEM SSH type name must be selected.
 - **Orchestrator** – Select the orchestrator you wish to use to manage this store
-- **Client Machine &amp; Credentials** – Required. The server name or IP Address and login credentials for the server where the Certificate Store is located. When setting up a Windows server, the format of the machine name must be – [http://_ServerName_:5985](http://ServerName:5985/), where &quot;5985&quot; is the WinRM port number. 5985 is the standard, but if your organization uses a different v
+- **Client Machine &amp; Credentials** – Required. The server name or IP Address and login credentials for the server where the Certificate Store is located. When setting up a Windows server, the format of the machine name must be – [http://_ServerName_:5985](http://ServerName:5985/), where &quot;5985&quot; is the WinRM port number. 5985 is the standard, but if your organization uses a different, use that.
 - **When** – Required. The date and time when you would like this to execute.
 - **Directories to search** – Required. A comma delimitted list of the FULL PATHs and file names where you would like to recursively search for PEM/PKCS12 stores. File paths on Linux servers will always begin with a &quot;/&quot;. Windows servers will always begin with the drive letter, colon, and backslash, such as &quot;c:\&quot;.
 - **Directories to ignore** – Optional. A comma delimitted list of the FULL PATHs that should be recursively ignored when searching for PEM/PKCS12 stores. Linux file paths will always begin with a &quot;/&quot;. Windows servers will always begin with the drive letter, colon, and backslash, such as &quot;c:\&quot;.
