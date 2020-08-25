@@ -38,17 +38,21 @@ namespace PEMStoreSSH
                 string[] directoriesToSearch = properties.dirs.Value.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
                 string[] extensionsToSearch = properties.extensions.Value.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
                 string[] ignoredDirs = properties.ignoreddirs.Value.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                string[] filesTosearch = properties.patterns.Value.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+
                 bool isP12 = (bool)properties.compatibility.Value;
 
                 if (directoriesToSearch.Length == 0)
                     throw new PEMException("Blank or missing search directories for Discovery.");
                 if (extensionsToSearch.Length == 0)
                     throw new PEMException("Blank or missing search extensions for Discovery.");
+                if (filesTosearch.Length == 0)
+                    filesTosearch = new string[] { "*" };
 
                 PEMStore pemStore = new PEMStore(config.Store.ClientMachine, config.Server.Username, config.Server.Password, directoriesToSearch[0].Substring(0, 1) == "/" ? PEMStore.ServerTypeEnum.Linux : PEMStore.ServerTypeEnum.Windows,
                     isP12 ? PEMStore.FormatTypeEnum.PKCS12 : PEMStore.FormatTypeEnum.PEM);
 
-                locations = pemStore.FindStores(directoriesToSearch, extensionsToSearch).ToList();
+                locations = pemStore.FindStores(directoriesToSearch, extensionsToSearch, filesTosearch).ToList();
                 foreach (string ignoredDir in ignoredDirs)
                     locations = locations.Where(p => !p.StartsWith(ignoredDir.TrimStart(' '))).ToList();
 

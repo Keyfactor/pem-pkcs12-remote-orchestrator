@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 
@@ -70,9 +71,9 @@ namespace PEMStoreSSH
             return SSH.DoesFileExist(path);
         }
 
-        internal List<string> FindStores(string[] paths, string[] extensions)
+        internal List<string> FindStores(string[] paths, string[] extensions, string[] files)
         {
-            return ServerType == ServerTypeEnum.Linux ? FindStoresLinux(paths, extensions) : FindStoresWindows(paths, extensions);
+            return ServerType == ServerTypeEnum.Linux ? FindStoresLinux(paths, extensions, files) : FindStoresWindows(paths, extensions, files);
         }
 
         internal X509Certificate2Collection GetCertificates(string storePassword, out bool containsPrivateKey)
@@ -149,30 +150,30 @@ namespace PEMStoreSSH
             SSH.CreateEmptyStoreFile(path);
         }
 
-        private List<string> FindStoresLinux(string[] paths, string[] extensions)
+        private List<string> FindStoresLinux(string[] paths, string[] extensions, string[] fileNames)
         {
+
             try
             {
                 string concatPaths = string.Join(" ", paths);
                 string command = $"find {concatPaths} ";
-                string commandNoExt = $"find {concatPaths} -type f ! -name '*.*'";
-
-                bool searchNoExtension = extensions.Any(p => p == NO_EXTENSION);
 
                 foreach (string extension in extensions)
                 {
-                    if (extension == NO_EXTENSION)
-                        continue;
-                    command += (command.IndexOf("-name") == -1 ? string.Empty : "-or ");
-                    command += $"-name '*.{extension}' ";
+                    foreach (string fileName in fileNames)
+                    {
+                        command += (command.IndexOf("-iname") == -1 ? string.Empty : "-or ");
+                        command += $"-iname '{fileName.Trim()}";
+                        if (extension.ToLower() == NO_EXTENSION)
+                            command += $"' ! -iname '*.*' ";
+                        else
+                            command += $".{extension.Trim()}' ";
+                    }
                 }
 
                 string result = string.Empty;
                 if (extensions.Any(p => p.ToLower() != NO_EXTENSION))
                     result = SSH.RunCommand(command, null, ApplicationSettings.UseSudo, null);
-
-                if (searchNoExtension)
-                    result += ('\n' + SSH.RunCommand(commandNoExt, null, ApplicationSettings.UseSudo, null));
 
                 return (result.Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries)).ToList();
             }
@@ -182,14 +183,20 @@ namespace PEMStoreSSH
             }
         }
 
-        private List<string> FindStoresWindows(string[] paths, string[] extensions)
+        private List<string> FindStoresWindows(string[] paths, string[] extensions, string[] fileNames)
         {
             List<string> results = new List<string>();
-            string concatExtensions = "*." + string.Join(" *.", extensions);
+            StringBuilder concatFileNames = new StringBuilder();
 
             foreach (string path in paths)
             {
-                string command = $"cd {path} | cmd /r dir {concatExtensions} /s /b ";
+                foreach (string extension in extensions)
+                {
+                    foreach (string fileName in fileNames)
+                        concatFileNames.Append($",{fileName}.{extension}");
+                }
+
+                string command = $"(Get-ChildItem -Path {FormatPath(path)} -Recurse -Include {concatFileNames.ToString().Substring(1)}).fullname";
                 string result = SSH.RunCommand(command, null, false, null);
                 results.AddRange(result.Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries).ToList());
             }
@@ -208,6 +215,11 @@ namespace PEMStoreSSH
                 default:
                     throw new Exception("Invalid certificate format:");
             }
+        }
+
+        private string FormatPath(string path)
+        {
+            return path + (path.Substring(path.Length - 1) == @"\" ? string.Empty : @"\");
         }
     }
 
