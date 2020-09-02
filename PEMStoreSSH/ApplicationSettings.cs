@@ -8,6 +8,7 @@ namespace PEMStoreSSH
     class ApplicationSettings
     {
         public static bool UseSudo { get; set; }
+        public static bool CreateStoreOnAddIfMissing { get; set; }
 
         public static void Initialize(string currLocation)
         {
@@ -22,6 +23,7 @@ namespace PEMStoreSSH
             dynamic jsonContents = JsonConvert.DeserializeObject(configContents);
 
             UseSudo = jsonContents.UseSudo.Value.Equals("Y", System.StringComparison.OrdinalIgnoreCase);
+            CreateStoreOnAddIfMissing = jsonContents.CreateStoreOnAddIfMissing.Value.Equals("Y", System.StringComparison.OrdinalIgnoreCase);
         }
     }
 }

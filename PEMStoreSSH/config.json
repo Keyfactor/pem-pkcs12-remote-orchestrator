@@ -1,3 +1,4 @@
 {
   "UseSudo": "N",
+  "CreateStoreOnAddIfMissing":  "Y"
 }

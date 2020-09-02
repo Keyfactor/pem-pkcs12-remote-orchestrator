@@ -57,7 +57,16 @@ namespace PEMStoreSSH
                 switch (config.Job.OperationType)
                 {
                     case AnyJobOperationType.Add:
-                        if (!pemStore.DoesStoreExist(config.Store.StorePath))
+                        bool storeExists = pemStore.DoesStoreExist(config.Store.StorePath);
+
+                        if (ApplicationSettings.CreateStoreOnAddIfMissing && !storeExists)
+                        {
+                            pemStore.CreateEmptyStoreFile(config.Store.StorePath);
+                            if (hasSeparatePrivateKey && privateKeyPath != null)
+                                pemStore.CreateEmptyStoreFile(privateKeyPath);
+                        }
+
+                        if (!ApplicationSettings.CreateStoreOnAddIfMissing && !storeExists)
                             throw new PEMException($"Certificate store {config.Store.StorePath} does not exist.");
 
                         pemStore.AddCertificateToStore(config.Job.EntryContents, config.Job.Alias, config.Job.PfxPassword, config.Store.StorePassword, config.Job.Overwrite, hasPassword);
