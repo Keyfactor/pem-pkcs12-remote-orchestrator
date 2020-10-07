@@ -141,7 +141,7 @@ namespace PEMStoreSSH
 
         public bool IsValidStore(string path, PEMStore.ServerTypeEnum serverType, IRemoteHandler ssh)
         {
-            string command = serverType == PEMStore.ServerTypeEnum.Linux ? $"grep -i -- '{CertDelimBeg}' {path}" : $"cmd /r findstr /i /l /c:\"{CertDelimBeg}\" {path}";
+            string command = serverType == PEMStore.ServerTypeEnum.Linux ? $"grep -i -- '{CertDelimBeg}' {path}" : $"cmd /r findstr /i /l /c:\"{CertDelimBeg}\" \"{path}\"";
             string result = ssh.RunCommand(command, null, ApplicationSettings.UseSudo, null);
             return result.IndexOf(CertDelimBeg) > -1;
         }
