@@ -196,7 +196,7 @@ namespace PEMStoreSSH
                         concatFileNames.Append($",{fileName}.{extension}");
                 }
 
-                string command = $"(Get-ChildItem -Path {FormatPath(path)} -Recurse -Include {concatFileNames.ToString().Substring(1)}).fullname";
+                string command = $@"(Get-ChildItem -Path ""{FormatPath(path)}"" -Recurse -Include {concatFileNames.ToString().Substring(1)}).fullname";
                 string result = SSH.RunCommand(command, null, false, null);
                 results.AddRange(result.Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries).ToList());
             }

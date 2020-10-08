@@ -83,7 +83,7 @@ namespace PEMStoreSSH.RemoteHandlers
         {
             Logger.Debug($"DoesFileExist: {path}");
 
-            return Convert.ToBoolean(RunCommand($@"Test-Path -path {path}", null, false, null));
+            return Convert.ToBoolean(RunCommand($@"Test-Path -path ""{path}""", null, false, null));
         }
 
         public override void UploadCertificateFile(string path, byte[] certBytes)
@@ -93,7 +93,7 @@ namespace PEMStoreSSH.RemoteHandlers
             string scriptBlock = $@"
                                     param($contents)
                                 
-                                    Set-Content {path} -Encoding Byte -Value $contents
+                                    Set-Content ""{path}"" -Encoding Byte -Value $contents
                                 ";
 
             object[] arguments = new object[] { certBytes };
@@ -106,21 +106,21 @@ namespace PEMStoreSSH.RemoteHandlers
             Logger.Debug($"DownloadCertificateFile: {path}");
 
             if (hasBinaryContent)
-                return RunCommandBinary($@"Get-Content -Path {path} -Encoding Byte -Raw");
+                return RunCommandBinary($@"Get-Content -Path ""{path}"" -Encoding Byte -Raw");
             else
-                return Encoding.ASCII.GetBytes(RunCommand($@"Get-Content -Path {path}", null, false, null));
+                return Encoding.ASCII.GetBytes(RunCommand($@"Get-Content -Path ""{path}""", null, false, null));
         }
 
         public override void RemoveCertificateFile(string path)
         {
             Logger.Debug($"RemoveCertificateFile: {path}");
 
-            RunCommand($"rm {path}", null, false, null);
+            RunCommand($@"rm ""{path}""", null, false, null);
         }
-
+        
         public override void CreateEmptyStoreFile(string path)
         {
-            RunCommand($"Out-File -FilePath {path}", null, false, null);
+            RunCommand($@"Out-File -FilePath ""{path}""", null, false, null);
         }
 
 
