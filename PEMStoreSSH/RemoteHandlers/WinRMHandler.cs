@@ -175,7 +175,10 @@ namespace PEMStoreSSH.RemoteHandlers
             StringBuilder rtn = new StringBuilder();
 
             foreach (PSObject resultLine in results)
-                rtn.Append(resultLine.ToString() + System.Environment.NewLine);
+            {
+                if (resultLine != null)
+                    rtn.Append(resultLine.ToString() + System.Environment.NewLine);
+            }
 
             return rtn.ToString();
         }
