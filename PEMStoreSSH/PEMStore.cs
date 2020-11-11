@@ -11,6 +11,7 @@ namespace PEMStoreSSH
     internal class PEMStore
     {
         private const string NO_EXTENSION = "noext";
+        private const string FULL_SCAN = "fullscan";
 
         public enum FormatTypeEnum
         {
@@ -187,6 +188,15 @@ namespace PEMStoreSSH
         {
             List<string> results = new List<string>();
             StringBuilder concatFileNames = new StringBuilder();
+
+            if (paths[0] == FULL_SCAN)
+            {
+                string command = @"Get-WmiObject Win32_Logicaldisk -Filter ""DriveType = '3'"" | % {$_.DeviceId}";
+                string result = SSH.RunCommand(command, null, false, null);
+                paths = result.Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+                for (int i = 0; i < paths.Length; i++)
+                    paths[i] += "/";
+            }
 
             foreach (string path in paths)
             {

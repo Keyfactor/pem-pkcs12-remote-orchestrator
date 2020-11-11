@@ -40,7 +40,7 @@ namespace PEMStoreSSH
             dynamic properties = JsonConvert.DeserializeObject(config.Store.Properties.ToString());
             bool hasSeparatePrivateKey = properties.separatePrivateKey == null || string.IsNullOrEmpty(properties.separatePrivateKey.Value) ? false : Boolean.Parse(properties.separatePrivateKey.Value);
             string privateKeyPath = hasSeparatePrivateKey ? (properties.pathToPrivateKey == null || string.IsNullOrEmpty(properties.pathToPrivateKey.Value) ? null : properties.pathToPrivateKey.Value) : string.Empty;
-
+            
             if (properties.type.Value == null || string.IsNullOrEmpty(properties.type.Value))
                 throw new PEMException("Mising certificate store Type.  Please ensure store is defined as either PEM or PKCS12.");
             if (hasSeparatePrivateKey && string.IsNullOrEmpty(privateKeyPath))
