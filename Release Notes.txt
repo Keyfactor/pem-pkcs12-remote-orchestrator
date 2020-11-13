@@ -1,6 +1,3 @@
-v1.0.7:
-- Added 2 new config entries, UseSeparateUploadFilePath and  SeparateUploadFilePath, to allow for a temporary file upload folder for sftp operations - Linux only
-
 v1.0.6:
 - Added ability to perform recursive search on all available local drives on Windows servers by entering "fullscan" in "Directories to Search"
 
