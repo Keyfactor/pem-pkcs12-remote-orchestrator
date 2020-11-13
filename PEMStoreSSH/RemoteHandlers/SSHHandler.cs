@@ -93,6 +93,16 @@ namespace PEMStoreSSH.RemoteHandlers
         {
             Logger.Debug($"UploadCertificateFile: {path}");
 
+            string uploadPath = path;
+            string altPathOnly = string.Empty;
+            string altFileNameOnly = string.Empty;
+
+            if (ApplicationSettings.UseSeparateUploadFilePath)
+            {
+                SplitStorePathFile(path, out altPathOnly, out altFileNameOnly);
+                uploadPath = ApplicationSettings.SeparateUploadFilePath + altFileNameOnly;
+            }
+
             using (SftpClient client = new SftpClient(Connection))
             {
                 try
@@ -101,8 +111,11 @@ namespace PEMStoreSSH.RemoteHandlers
 
                     using (MemoryStream stream = new MemoryStream(certBytes))
                     {
-                        client.UploadFile(stream, FormatFTPPath(path));
+                        client.UploadFile(stream, FormatFTPPath(uploadPath));
                     }
+
+                    if (ApplicationSettings.UseSeparateUploadFilePath)
+                        RunCommand($"mv {uploadPath} {path}", null, ApplicationSettings.UseSudo, null);
                 }
                 finally
                 {
@@ -167,6 +180,20 @@ namespace PEMStoreSSH.RemoteHandlers
         private string FormatFTPPath(string path)
         {
             return path.Substring(0, 1) == @"/" ? path : @"/" + path.Replace("\\", "/");
+        }
+
+        private void SplitStorePathFile(string pathFileName, out string path, out string fileName)
+        {
+            try
+            {
+                int separatorIndex = pathFileName.LastIndexOf(pathFileName.Substring(0, 1) == "/" ? @"/" : @"\");
+                fileName = pathFileName.Substring(separatorIndex + 1);
+                path = pathFileName.Substring(0, separatorIndex + 1);
+            }
+            catch (Exception ex)
+            {
+                throw new PEMException($"Error attempting to parse certficate store/key path={pathFileName}.", ex);
+            }
         }
     }
 }
