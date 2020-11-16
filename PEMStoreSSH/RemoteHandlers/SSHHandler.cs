@@ -128,15 +128,30 @@ namespace PEMStoreSSH.RemoteHandlers
         {
             Logger.Debug($"DownloadCertificateFile: {path}");
 
+            string downloadPath = path;
+            string altPathOnly = string.Empty;
+            string altFileNameOnly = string.Empty;
+
+            if (ApplicationSettings.UseSeparateUploadFilePath)
+            {
+                SplitStorePathFile(path, out altPathOnly, out altFileNameOnly);
+                downloadPath = ApplicationSettings.SeparateUploadFilePath + altFileNameOnly;
+            }
+
             using (SftpClient client = new SftpClient(Connection))
             {
                 try
                 {
                     client.Connect();
 
+                    if (ApplicationSettings.UseSeparateUploadFilePath)
+                        RunCommand($"cp {path} {downloadPath}", null, ApplicationSettings.UseSudo, null);
+
                     using (MemoryStream stream = new MemoryStream())
                     {
-                        client.DownloadFile(FormatFTPPath(path), stream);
+                        client.DownloadFile(FormatFTPPath(downloadPath), stream);
+                        if (ApplicationSettings.UseSeparateUploadFilePath)
+                            RunCommand($"rm {downloadPath}", null, ApplicationSettings.UseSudo, null);
                         return stream.ToArray();
                     }
                 }
