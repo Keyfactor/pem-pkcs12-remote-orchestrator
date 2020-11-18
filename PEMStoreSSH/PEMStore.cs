@@ -34,6 +34,7 @@ namespace PEMStoreSSH
         private ICertificateFormatHandler CertificateHandler { get; set; }
         private IRemoteHandler SSH { get; set; }
         public ServerTypeEnum ServerType { get; set; }
+        public bool IsSingleCertificateStore { get; set; }
 
 
         internal PEMStore(string server, string serverId, string serverPassword, string storeFileAndPath, string storePassword, FormatTypeEnum formatType, string privateKeyPath)
@@ -133,7 +134,7 @@ namespace PEMStoreSSH
             try
             {
                 List<SSHFileInfo> files = CertificateHandler.CreateCertificatePacket(cert, alias, pfxPassword, storePassword, !String.IsNullOrEmpty(PrivateKeyPath));
-                CertificateHandler.AddCertificateToStore(files, StorePath, PrivateKeyPath, SSH, ServerType, overwrite, containsPrivateKey);
+                CertificateHandler.AddCertificateToStore(files, StorePath, PrivateKeyPath, SSH, ServerType, overwrite, containsPrivateKey, IsSingleCertificateStore);
             }
             catch (Exception ex)
             {

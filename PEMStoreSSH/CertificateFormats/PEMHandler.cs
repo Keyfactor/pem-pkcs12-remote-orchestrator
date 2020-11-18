@@ -117,12 +117,16 @@ namespace PEMStoreSSH
             return fileInfo;
         }
 
-        public void AddCertificateToStore(List<SSHFileInfo> files, string storePath, string privateKeyPath, IRemoteHandler ssh, PEMStore.ServerTypeEnum serverType, bool overwrite, bool hasPrivateKey)
+        public void AddCertificateToStore(List<SSHFileInfo> files, string storePath, string privateKeyPath, IRemoteHandler ssh, PEMStore.ServerTypeEnum serverType, bool overwrite, bool hasPrivateKey, bool isSingleCertificateStore)
         {
             SSHFileInfo certInfo = files.FirstOrDefault(p => p.FileType == SSHFileInfo.FileTypeEnum.Certificate);
             X509Certificate2 x509Cert = new X509Certificate2(Encoding.ASCII.GetBytes(certInfo.FileContents));
 
-            AddRemoveCertificate(serverType, storePath, ssh, certInfo.Alias, x509Cert.Thumbprint, certInfo.FileContents, privateKeyPath, hasPrivateKey, overwrite, true);
+            if (isSingleCertificateStore)
+                ReplaceStoreContents(storePath, ssh, certInfo.FileContents, overwrite);
+            else
+                AddRemoveCertificate(serverType, storePath, ssh, certInfo.Alias, x509Cert.Thumbprint, certInfo.FileContents, privateKeyPath, hasPrivateKey, overwrite, true);
+
 
             if (!string.IsNullOrEmpty(privateKeyPath) && files.Exists(p => p.FileType == SSHFileInfo.FileTypeEnum.PrivateKey))
             {
@@ -187,6 +191,16 @@ namespace PEMStoreSSH
                 storeContents += ("\n" + replacementCert);
 
             ssh.UploadCertificateFile(storePath, Encoding.ASCII.GetBytes(storeContents));
+        }
+
+        private void ReplaceStoreContents(string storePath, IRemoteHandler ssh, string fileContents, bool overwrite)
+        {
+            byte[] storebytes = ssh.DownloadCertificateFile(storePath, HasBinaryContent);
+            string storeContents = Encoding.ASCII.GetString(storebytes);
+            if (!overwrite && storeContents.IndexOf(CertDelimBeg, StringComparison.OrdinalIgnoreCase) > -1)
+                throw new PEMException("Certificate store currently contains one or more certificates.  Please select 'overwrite' to replace the contents of the store.");
+
+            ssh.UploadCertificateFile(storePath, Encoding.ASCII.GetBytes(fileContents));
         }
 
         private string RemoveAllPrivateKeys(string storeContents)

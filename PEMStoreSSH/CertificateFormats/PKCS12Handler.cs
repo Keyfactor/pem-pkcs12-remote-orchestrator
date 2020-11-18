@@ -78,7 +78,7 @@ namespace PEMStoreSSH
             return fileInfo;
         }
 
-        public void AddCertificateToStore(List<SSHFileInfo> files, string storePath, string privateKeyPath, IRemoteHandler ssh, PEMStore.ServerTypeEnum serverType, bool overwrite, bool hasPrivateKey)
+        public void AddCertificateToStore(List<SSHFileInfo> files, string storePath, string privateKeyPath, IRemoteHandler ssh, PEMStore.ServerTypeEnum serverType, bool hasPrivateKey, bool overwrite, bool isSingleCertificateStore)
         {
             foreach (SSHFileInfo file in files)
                 ssh.UploadCertificateFile(file.FileType == SSHFileInfo.FileTypeEnum.Certificate ? storePath : privateKeyPath,
