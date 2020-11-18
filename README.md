@@ -32,6 +32,11 @@ In Keyfactor Command create a new Certificate Store Type similar to the one belo
 
 ![](Images/Image4.png)
 
+  - **Contains Single Certificate (Name MUST be &quot;isSingleCertificateStore&quot;):** Optional parameter, default value 'False'.  If set to 'True' this certificate store will be managed with the assumption that only one certificate can exist in the store.  All Managment-Add jobs against this store will completely replace the contents of the store with the added certificate, assuming overwrite is set to 'True' for the job.  If overwrite is not selected ('False'), the Management-Add job will complete with an error saying a certificate already exists.  No alias/thumbprint matching will be done when adding/renewing a certificate when this value is set to 'True'.
+
+![](Images/Image14.png)
+
+
 **2. Register the PEM_PKCS12 AnyAgent with Keyfactor**
 
 Open the Keyfactor Windows Agent Configuration Wizard and perform the tasks as illustrated below:
