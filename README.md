@@ -1,8 +1,31 @@
-**PEM_PKCS12 AnyAgent Configuration**
+##Overview
 
-**Overview**
+The PEM_PKCS12 AnyAgent allows a user to discover, inventory, and manage (both add and remove) PEM and PKCS12 based certificate stores on both Windows and Linux servers. The communication between the orchestrator agent and the server being orchestrated is handled using SSH for Linux orchestrated servers and WinRM for Windows orchestrated servers.
 
-The PEM_PKCS12 AnyAgent allows a user to discover, inventory, and manage (both add and remove) PEM and PKCS12 based certificate stores on both Windows and Linux servers. The communication between the orchestrator agent and the server being orchestrated is handled using SSH for Linux orchestrated servers and WinRM for Windows orchestrated servers.d
+
+##Use Cases
+
+The PEM_PKCS12 Windows AnyAgent implements the following capabilities:
+
+1. Create - Create either a PEM or PKCS12 certificate store.
+2. Discovery - Discover all PEM or PKCS12 certificate stores in a set of paths based on optional list of file extensions and partial name matching.
+3. Inventory - Return all certificates for a defined certificate store.
+4. Management (Add) - Add a certificate to a defined certificate store.
+5. Management (Remove) - Remove a certificate from a defined certificate store.
+
+The PEM_PKCS12 Windows AnyAgent supports the following types of certificate stores:
+
+1. PEM trust stores (multiple public (most likely CA) certificates with no private keys).
+2. PEM certificate stores containing one public certificate and one private key.
+3. PEM certificate stores containing one public certificate and an external private key stored in a separate file.
+4. PKCS12 certificate stores containing one certificate with a private key.
+
+##Keyfactor Version Supported
+
+The PEM_PKCS12 Windows AnyAgent has been tested against Keyfactor version 8.1.1 but should work against earlier or later versions.
+
+
+##PEM_PKCS12 AnyAgent Configuration
 
 **1. Create the New Certificate Store Type for the New PEM_PKCS12 AnyAgent**
 
