@@ -20,6 +20,11 @@ The PEM_PKCS12 Windows AnyAgent supports the following types of certificate stor
 3. PEM certificate stores containing one public certificate and an external private key stored in a separate file.
 4. PKCS12 certificate stores containing one certificate with a private key.
 
+
+##Versioning
+
+The version number of a the PEM_PKCS12 Windows AnyAgent can be verified by right clicking on the PEMStoreSSH.dll file in the Plugins installation folder, selecting Properties, and then clicking on the Details tab.
+
 ##Keyfactor Version Supported
 
 The PEM_PKCS12 Windows AnyAgent has been tested against Keyfactor version 8.1.1 but should work against earlier or later versions.
