@@ -111,7 +111,7 @@ If you choose to manually create a PEM_PKCS12 store In Keyfactor Command rather 
 - **Separate Private Key File** – Check if the store has a separate private key file.
 - **Path to Private Key File** – If Separate Private Key File is checked, enter the FULL PATH to the private key file. File paths on Linux servers will always begin with a &quot;/&quot;. Windows servers will always begin with the drive letter, colon, and backslash, such as &quot;c:\&quot;.
 - **Orchestrator** – Select the orchestrator you wish to use to manage this store
-- **Store Password** – Set the store password or set no password after clicking the supplied button. This option will generally only be set to a password for PKCS12 files containing a private key.
+- **Store Password** – Set the store password or set no password after clicking the supplied button.  If a store password is entered, this value will be used when encrypting private keys that get written to the certificate store during certificate add operations.  Selecting "No Password" will cause a system generated password to be used when encrypting private keys during certificate add operations.
 - **Inventory Schedule** – Set a schedule for running Inventory jobs or none, if you choose not to schedule Inventory at this time.
 
 **3b. (Optional) Schedule a PEM_PKCS12 Discovery Job**
