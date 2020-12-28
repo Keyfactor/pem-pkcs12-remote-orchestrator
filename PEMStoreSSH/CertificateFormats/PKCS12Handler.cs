@@ -66,7 +66,7 @@ namespace PEMStoreSSH
 
             using (MemoryStream outStream = new MemoryStream())
             {
-                store.Save(outStream, storePassword.ToCharArray(), new Org.BouncyCastle.Security.SecureRandom());
+                store.Save(outStream, string.IsNullOrEmpty(storePassword) ? pfxPassword.ToCharArray() : storePassword.ToCharArray(), new Org.BouncyCastle.Security.SecureRandom());
                 fileInfo.Add(new SSHFileInfo()
                 {
                     FileType = SSHFileInfo.FileTypeEnum.Certificate,

@@ -196,7 +196,7 @@ namespace PEMStoreSSH
                 string result = SSH.RunCommand(command, null, false, null);
                 paths = result.Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
                 for (int i = 0; i < paths.Length; i++)
-                    paths[i] += "/";
+                    paths[i] += @"\";
             }
 
             foreach (string path in paths)
