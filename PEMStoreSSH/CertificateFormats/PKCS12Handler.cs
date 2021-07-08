@@ -11,6 +11,8 @@ using System.IO;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 
+using CSS.PKI.X509;
+
 using Org.BouncyCastle.Pkcs;
 
 using PEMStoreSSH.RemoteHandlers;
@@ -61,16 +63,40 @@ namespace PEMStoreSSH
             }
         }
 
+        //public List<SSHFileInfo> CreateCertificatePacket(string certToAdd, string alias, string pfxPassword, string storePassword, bool hasSeparatePrivateKey)
+        //{
+        //    List<SSHFileInfo> fileInfo = new List<SSHFileInfo>();
+        //    Pkcs12Store store;
+
+        //    using (MemoryStream inStream = new MemoryStream(Convert.FromBase64String(certToAdd)))
+        //    {
+        //        store = new Pkcs12Store(inStream, pfxPassword.ToCharArray());
+        //    }
+
+        //    using (MemoryStream outStream = new MemoryStream())
+        //    {
+        //        store.Save(outStream, string.IsNullOrEmpty(storePassword) ? pfxPassword.ToCharArray() : storePassword.ToCharArray(), new Org.BouncyCastle.Security.SecureRandom());
+        //        fileInfo.Add(new SSHFileInfo()
+        //        {
+        //            FileType = SSHFileInfo.FileTypeEnum.Certificate,
+        //            FileContentBytes = outStream.ToArray(),
+        //            Alias = alias
+        //        });
+        //    }
+
+        //    return fileInfo;
+        //}
+
         public List<SSHFileInfo> CreateCertificatePacket(string certToAdd, string alias, string pfxPassword, string storePassword, bool hasSeparatePrivateKey)
         {
+            CertificateConverter converter = CertificateConverterFactory.FromDER(Convert.FromBase64String(certToAdd), pfxPassword);
+            Org.BouncyCastle.X509.X509Certificate cert = converter.ToBouncyCastleCertificate();
+            X509CertificateEntry entry = new X509CertificateEntry(cert);
+
+            Pkcs12Store store = new Pkcs12Store();
+            store.SetCertificateEntry(alias, entry);
+
             List<SSHFileInfo> fileInfo = new List<SSHFileInfo>();
-            Pkcs12Store store;
-
-            using (MemoryStream inStream = new MemoryStream(Convert.FromBase64String(certToAdd)))
-            {
-                store = new Pkcs12Store(inStream, pfxPassword.ToCharArray());
-            }
-
             using (MemoryStream outStream = new MemoryStream())
             {
                 store.Save(outStream, string.IsNullOrEmpty(storePassword) ? pfxPassword.ToCharArray() : storePassword.ToCharArray(), new Org.BouncyCastle.Security.SecureRandom());
