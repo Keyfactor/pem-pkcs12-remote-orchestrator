@@ -11,6 +11,7 @@ namespace PEMStoreSSH
         public static bool CreateStoreOnAddIfMissing { get; set; }
         public static bool UseSeparateUploadFilePath { get; set; }
         public static string SeparateUploadFilePath { get; set; }
+        public static bool UseNegotiateAuth { get; set; }
 
         public static void Initialize(string currLocation)
         {
@@ -28,6 +29,7 @@ namespace PEMStoreSSH
             CreateStoreOnAddIfMissing = jsonContents.CreateStoreOnAddIfMissing.Value.Equals("Y", System.StringComparison.OrdinalIgnoreCase);
             UseSeparateUploadFilePath = jsonContents.UseSeparateUploadFilePath.Value.Equals("Y", System.StringComparison.OrdinalIgnoreCase);
             SeparateUploadFilePath = AddTrailingSlash(jsonContents.SeparateUploadFilePath.Value);
+            UseNegotiateAuth = jsonContents.UseNegotiateAuth.Value.Equals("Y", System.StringComparison.OrdinalIgnoreCase);
         }
 
         private static string AddTrailingSlash(string path)
