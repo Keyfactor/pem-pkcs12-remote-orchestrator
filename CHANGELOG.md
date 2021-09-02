@@ -1,6 +1,6 @@
 v1.3
-- Add optional config option to use Negotiate when connecting to Windows servers via WinRM
-- Modify config options to be optional with default values (false for boolean, and blank for string)
+- Add config option to use Negotiate when connecting to Windows servers via WinRM
+- Updated Renci.SSH.Net reference
 
 v1.2.0:
 - Fix issue where adding multiple certificates to an existing store via multiple concurrent Management jobs was causing some certificates to not get added
