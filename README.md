@@ -157,6 +157,7 @@ The PEM_PKCS12 Orchestrator uses a JSON config file:
 &quot;UseSeparateUploadFilePath&quot;: &quot;N&quot;,  
 &quot;SeparateUploadFilePath&quot;: &quot;/path/to/upload/folder/&quot;  
 &quot;UseNegotiateAuth&quot;: &quot;N&quot;
+
 }
 
 **UseSudo** - Y/N - Determines whether to prefix certain Linux command with &quot;sudo&quot;. This can be very helpful in ensuring that the user id running commands ssh uses &quot;least permissions necessary&quot; to process each task. Setting this value to &quot;Y&quot; will prefix all Linux commands with &quot;sudo&quot; with the expectation that the command being executed on the orchestrated Linux server will look in the sudoers file to determine whether the logged in ID has elevated permissions for that specific command. For orchestrated Windows servers, this setting has no effect. Setting this value to &quot;N&quot; will result in &quot;sudo&quot; not being added to Linux commands.  
