@@ -25,6 +25,8 @@ namespace PEMStoreSSH
 
             dynamic jsonContents = JsonConvert.DeserializeObject(configContents);
 
+            ValidateConfig(jsonContents);
+
             UseSudo = jsonContents.UseSudo == null ? false : jsonContents.UseSudo.Value.Equals("Y", System.StringComparison.OrdinalIgnoreCase);
             CreateStoreOnAddIfMissing = jsonContents.CreateStoreOnAddIfMissing == null ? false : jsonContents.CreateStoreOnAddIfMissing.Value.Equals("Y", System.StringComparison.OrdinalIgnoreCase);
             UseSeparateUploadFilePath = jsonContents.UseSeparateUploadFilePath == null ? false : jsonContents.UseSeparateUploadFilePath.Value.Equals("Y", System.StringComparison.OrdinalIgnoreCase);
@@ -37,6 +39,25 @@ namespace PEMStoreSSH
             if (path.Length == 0)
                 return string.Empty;
             return path.Substring(path.Length - 1, 1) == @"/" ? path : path += @"/";
+        }
+
+        private static void ValidateConfig(dynamic jsonContents)
+        {
+            string errors = string.Empty;
+
+            if (jsonContents.UseSudo == null)
+                errors += "UseSudo, ";
+            if (jsonContents.CreateStoreOnAddIfMissing == null)
+                errors += "CreateStoreOnAddIfMissing, ";
+            if (jsonContents.UseSeparateUploadFilePath == null)
+                errors += "UseSeparateUploadFilePath, ";
+            if (jsonContents.SeparateUploadFilePath == null)
+                errors += "SeparateUploadFilePath, ";
+            if (jsonContents.UseNegotiateAuth == null)
+                errors += "UseNegotiateAuth, ";
+
+            if (errors.Length > 0)
+                throw new JKSException($"The following configuration items are missing from the config.json file: {errors.Substring(0, errors.Length - 2)}");
         }
     }
 }
