@@ -57,7 +57,7 @@ namespace PEMStoreSSH
                 errors += "UseNegotiateAuth, ";
 
             if (errors.Length > 0)
-                throw new JKSException($"The following configuration items are missing from the config.json file: {errors.Substring(0, errors.Length - 2)}");
+                throw new PEMException($"The following configuration items are missing from the config.json file: {errors.Substring(0, errors.Length - 2)}");
         }
     }
 }
