@@ -27,13 +27,15 @@ namespace PEMStoreSSH
 
             UseSudo = jsonContents.UseSudo == null ? false : jsonContents.UseSudo.Value.Equals("Y", System.StringComparison.OrdinalIgnoreCase);
             CreateStoreOnAddIfMissing = jsonContents.CreateStoreOnAddIfMissing == null ? false : jsonContents.CreateStoreOnAddIfMissing.Value.Equals("Y", System.StringComparison.OrdinalIgnoreCase);
-            UseSeparateUploadFilePath = jsonContents.UseSeparateUploadFilePath == null ? false : jsonContents.UseSeparateUploadFilePath.Value.Equals("Y", System.StringComparison.OrdinalIgnoreCase);
+            UseSeparateUploadFilePath = jsonContents.UseSeparateUploadFilePath == null ? string.Empty : jsonContents.UseSeparateUploadFilePath.Value.Equals("Y", System.StringComparison.OrdinalIgnoreCase);
             SeparateUploadFilePath = jsonContents.SeparateUploadFilePath == null ? string.Empty : AddTrailingSlash(jsonContents.SeparateUploadFilePath.Value);
             UseNegotiateAuth = jsonContents.UseNegotiateAuth == null ? false : jsonContents.UseNegotiateAuth.Value.Equals("Y", System.StringComparison.OrdinalIgnoreCase);
         }
 
         private static string AddTrailingSlash(string path)
         {
+            if (path.Length == 0)
+                return string.Empty;
             return path.Substring(path.Length - 1, 1) == @"/" ? path : path += @"/";
         }
     }
