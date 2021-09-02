@@ -18,11 +18,11 @@ using Keyfactor.Platform.Extensions.Agents.Delegates;
 using Keyfactor.Platform.Extensions.Agents.Interfaces;
 
 using CSS.Common.Logging;
-
+using Keyfactor.Orchestrators.Extensions;
 
 namespace PEMStoreSSH
 {
-    public class Inventory: LoggingClientBase, IAgentJobExtension
+    public class Inventory: LoggingClientBase, IInventoryJobExtension
     {
         public string GetJobClass()
         {

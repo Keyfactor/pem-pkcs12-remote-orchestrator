@@ -23,10 +23,11 @@ using CSS.Common.Logging;
 using Org.BouncyCastle.Pkcs;
 using Org.BouncyCastle.OpenSsl;
 using Org.BouncyCastle.Crypto;
+using Keyfactor.Orchestrators.Extensions;
 
 namespace PEMStoreSSH
 {
-    public class Management: LoggingClientBase, IAgentJobExtension
+    public class Management: LoggingClientBase, IManagementJobExtension
     {
         public string GetJobClass()
         {
