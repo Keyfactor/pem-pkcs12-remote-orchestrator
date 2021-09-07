@@ -5,48 +5,28 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
 // and limitations under the License.
 
-using System;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Security.Cryptography.X509Certificates;
-
-using Newtonsoft.Json;
-
-using Keyfactor.Platform.Extensions.Agents;
-using Keyfactor.Platform.Extensions.Agents.Enums;
-using Keyfactor.Platform.Extensions.Agents.Delegates;
-using Keyfactor.Platform.Extensions.Agents.Interfaces;
-
 using CSS.Common.Logging;
-
-using Org.BouncyCastle.Pkcs;
-using Org.BouncyCastle.OpenSsl;
-using Org.BouncyCastle.Crypto;
+using Keyfactor.Orchestrators.Common.Enums;
 using Keyfactor.Orchestrators.Extensions;
+using Newtonsoft.Json;
+using System;
 
 namespace PEMStoreSSH
 {
-    public class Management: LoggingClientBase, IManagementJobExtension
+    public partial class Management: LoggingClientBase, IManagementJobExtension
     {
-        public string GetJobClass()
-        {
-            return "Management";
-        }
+        public string ExtensionName => "PEM-SSH";
 
-        public string GetStoreType()
-        {
-            return "PEM-SSH";
-        }
-
-        public AnyJobCompleteInfo processJob(AnyJobConfigInfo config, SubmitInventoryUpdate submitInventory, SubmitEnrollmentRequest submitEnrollmentRequest, SubmitDiscoveryResults sdr)
+        public JobResult ProcessJob(ManagementJobConfiguration config)
         {
             Logger.Debug($"Begin Management...");
 
-            bool hasPassword = !string.IsNullOrEmpty(config.Job.PfxPassword);
+            CertificateStore certStore = config.CertificateStoreDetails;
+            ManagementJobCertificate jobCert = config.JobCertificate;
+            bool hasPassword = !string.IsNullOrEmpty(jobCert.PrivateKeyPassword);
             
-            dynamic properties = JsonConvert.DeserializeObject(config.Store.Properties.ToString());
-            bool hasSeparatePrivateKey = properties.separatePrivateKey == null || string.IsNullOrEmpty(properties.separatePrivateKey.Value) ? false : Boolean.Parse(properties.separatePrivateKey.Value);
+            dynamic properties = JsonConvert.DeserializeObject(config.JobProperties.ToString());
+            bool hasSeparatePrivateKey = properties.separatePrivateKey == null || string.IsNullOrEmpty(properties.separatePrivateKey.Value) ? false : bool.Parse(properties.separatePrivateKey.Value);
             string privateKeyPath = hasSeparatePrivateKey ? (properties.pathToPrivateKey == null || string.IsNullOrEmpty(properties.pathToPrivateKey.Value) ? null : properties.pathToPrivateKey.Value) : string.Empty;
             
             if (properties.type == null || string.IsNullOrEmpty(properties.type.Value))
@@ -54,63 +34,90 @@ namespace PEMStoreSSH
             if (hasSeparatePrivateKey && string.IsNullOrEmpty(privateKeyPath))
                 throw new PEMException("Certificate store is set has having a separate private key but no private key path is specified in the store definition.");
             
-            PEMStore pemStore = new PEMStore(config.Store.ClientMachine, config.Server.Username, config.Server.Password, config.Store.StorePath, config.Store.StorePassword, Enum.Parse(typeof(PEMStore.FormatTypeEnum), properties.type.Value, true), 
-            privateKeyPath);
+            PEMStore pemStore = new PEMStore
+            (
+                certStore.ClientMachine,
+                config.ServerUsername,
+                config.ServerPassword,
+                certStore.StorePath,
+                certStore.StorePassword,
+                Enum.Parse(typeof(PEMStore.FormatTypeEnum), properties.type.Value, true), 
+                privateKeyPath
+            );
 
             if (properties.isSingleCertificateStore != null && !string.IsNullOrEmpty(properties.isSingleCertificateStore.Value))
-                pemStore.IsSingleCertificateStore = Boolean.Parse(properties.isSingleCertificateStore.Value);
+                pemStore.IsSingleCertificateStore = bool.Parse(properties.isSingleCertificateStore.Value);
 
             try
             {
                 ApplicationSettings.Initialize(this.GetType().Assembly.Location);
 
-                switch (config.Job.OperationType)
+                switch (config.OperationType)
                 {
-                    case AnyJobOperationType.Add:
-                        bool storeExists = pemStore.DoesStoreExist(config.Store.StorePath);
+                    case CertStoreOperationType.Add:
+                        bool storeExists = pemStore.DoesStoreExist(certStore.StorePath);
 
                         if (ApplicationSettings.CreateStoreOnAddIfMissing && !storeExists)
                         {
-                            pemStore.CreateEmptyStoreFile(config.Store.StorePath);
+                            pemStore.CreateEmptyStoreFile(certStore.StorePath);
                             if (hasSeparatePrivateKey && privateKeyPath != null)
                                 pemStore.CreateEmptyStoreFile(privateKeyPath);
                         }
 
                         if (!ApplicationSettings.CreateStoreOnAddIfMissing && !storeExists)
-                            throw new PEMException($"Certificate store {config.Store.StorePath} does not exist.");
+                            throw new PEMException($"Certificate store {certStore.StorePath} does not exist.");
 
-                        pemStore.AddCertificateToStore(config.Job.EntryContents, config.Job.Alias, config.Job.PfxPassword, config.Store.StorePassword, config.Job.Overwrite, hasPassword);
+                        pemStore.AddCertificateToStore
+                        (
+                            jobCert.Contents,
+                            jobCert.Alias,
+                            jobCert.PrivateKeyPassword,
+                            certStore.StorePassword,
+                            config.Overwrite,
+                            hasPassword
+                        );
 
                         break;
 
-                    case AnyJobOperationType.Remove:
-                        if (!pemStore.DoesStoreExist(config.Store.StorePath))
-                            throw new PEMException($"Certificate store {config.Store.StorePath} does not exist.");
+                    case CertStoreOperationType.Remove:
+                        if (!pemStore.DoesStoreExist(certStore.StorePath))
+                            throw new PEMException($"Certificate store {certStore.StorePath} does not exist.");
 
-                        pemStore.RemoveCertificate(config.Job.Alias);
+                        pemStore.RemoveCertificate(jobCert.Alias);
 
                         break;
 
-                    case AnyJobOperationType.Create:
-                        if (pemStore.DoesStoreExist(config.Store.StorePath))
-                            throw new PEMException($"Certificate store {config.Store.StorePath} already exists and cannot be created.");
+                    case CertStoreOperationType.Create:
+                        if (pemStore.DoesStoreExist(certStore.StorePath))
+                            throw new PEMException($"Certificate store {certStore.StorePath} already exists and cannot be created.");
 
-                        pemStore.CreateEmptyStoreFile(config.Store.StorePath);
+                        pemStore.CreateEmptyStoreFile(certStore.StorePath);
                         if (hasSeparatePrivateKey && privateKeyPath != null)
                             pemStore.CreateEmptyStoreFile(privateKeyPath);
 
                         break;
 
                     default:
-                        return new AnyJobCompleteInfo() { Status = 4, Message = $"Site {config.Store.StorePath} on server {config.Store.ClientMachine}: Unsupported operation: {config.Job.OperationType.ToString()}" };
+                        return new JobResult()
+                        {
+                            Result = OrchestratorJobStatusJobResult.Failure,
+                            FailureMessage = $"Site {certStore.StorePath} on server {certStore.ClientMachine}: Unsupported operation: {config.OperationType}"
+                        };
                 }
             }
             catch (Exception ex)
             {
-                return new AnyJobCompleteInfo() { Status = 4, Message = ExceptionHandler.FlattenExceptionMessages(ex, $"Site {config.Store.StorePath} on server {config.Store.ClientMachine}:") };
+                return new JobResult()
+                {
+                    Result = OrchestratorJobStatusJobResult.Failure,
+                    FailureMessage = ExceptionHandler.FlattenExceptionMessages(ex, $"Site {certStore.StorePath} on server {certStore.ClientMachine}:")
+                };
             }
 
-            return new AnyJobCompleteInfo() { Status = 2, Message = "Successful" };
+            return new JobResult()
+            {
+                Result = OrchestratorJobStatusJobResult.Success
+            };
         }
     }
 }
