@@ -5,12 +5,11 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
 // and limitations under the License.
 
+using Renci.SshNet;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-
-using Renci.SshNet;
 
 namespace PEMStoreSSH.RemoteHandlers
 {
@@ -21,20 +20,30 @@ namespace PEMStoreSSH.RemoteHandlers
         internal SSHHandler(string server, string serverLogin, string serverPassword)
         {
             if (string.IsNullOrEmpty(server))
+            {
                 throw new PEMException("Blank or missing server name for server orchestration.");
-            if (string.IsNullOrEmpty(serverLogin))
+            }
+            else if (string.IsNullOrEmpty(serverLogin))
+            {
                 throw new PEMException("Blank or missing username for server SSH login.");
-            if (string.IsNullOrEmpty(serverPassword))
+            }
+            else if (string.IsNullOrEmpty(serverPassword))
+            {
                 throw new PEMException("Blank or missing password or SSH key for server SSH login.");
+            }
 
 
             Server = server;
 
             List<AuthenticationMethod> authenticationMethods = new List<AuthenticationMethod>();
             if (serverPassword.Length < PASSWORD_LENGTH_MAX)
+            {
                 authenticationMethods.Add(new PasswordAuthenticationMethod(serverLogin, serverPassword));
+            }
             else
+            {
                 authenticationMethods.Add(new PrivateKeyAuthenticationMethod(serverLogin, new PrivateKeyFile[] { new PrivateKeyFile(new MemoryStream(Encoding.ASCII.GetBytes(ReplaceSpacesWithLF(serverPassword)))) }));
+            }
 
             Connection = new ConnectionInfo(server, serverLogin, authenticationMethods.ToArray());
         }
@@ -51,13 +60,17 @@ namespace PEMStoreSSH.RemoteHandlers
                     client.Connect();
 
                     if (withSudo)
+                    {
                         commandText = sudo + commandText;
+                    }
 
                     string displayCommand = commandText;
                     if (passwordsToMaskInLog != null)
                     {
                         foreach (string password in passwordsToMaskInLog)
+                        {
                             displayCommand = displayCommand.Replace(password, PASSWORD_MASK_VALUE);
+                        }
                     }
 
                     using (SshCommand command = client.CreateCommand($"{commandText}"))
@@ -122,7 +135,9 @@ namespace PEMStoreSSH.RemoteHandlers
                     }
 
                     if (ApplicationSettings.UseSeparateUploadFilePath)
+                    {
                         RunCommand($"mv {uploadPath} {path}", null, ApplicationSettings.UseSudo, null);
+                    }
                 }
                 finally
                 {
@@ -152,13 +167,17 @@ namespace PEMStoreSSH.RemoteHandlers
                     client.Connect();
 
                     if (ApplicationSettings.UseSeparateUploadFilePath)
+                    {
                         RunCommand($"cp {path} {downloadPath}", null, ApplicationSettings.UseSudo, null);
+                    }
 
                     using (MemoryStream stream = new MemoryStream())
                     {
                         client.DownloadFile(FormatFTPPath(downloadPath), stream);
                         if (ApplicationSettings.UseSeparateUploadFilePath)
+                        {
                             RunCommand($"rm {downloadPath}", null, ApplicationSettings.UseSudo, null);
+                        }
                         return stream.ToArray();
                     }
                 }

@@ -5,15 +5,14 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
 // and limitations under the License.
 
+using Keyfactor.Extensions.Pam.Utilities;
+using PEMStoreSSH.RemoteHandlers;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
-
-using PEMStoreSSH.RemoteHandlers;
-using Keyfactor.Extensions.Pam.Utilities;
 
 namespace PEMStoreSSH
 {
@@ -60,9 +59,13 @@ namespace PEMStoreSSH
             ServerType = StorePath.Substring(0, 1) == "/" ? ServerTypeEnum.Linux : ServerTypeEnum.Windows;
 
             if (ServerType == ServerTypeEnum.Linux)
+            {
                 SSH = new SSHHandler(Server, ServerId, ServerPassword);
+            }
             else
+            {
                 SSH = new WinRMHandler(Server, ServerId, ServerPassword);
+            }
         }
 
         internal PEMStore(string server, string serverId, string serverPassword, ServerTypeEnum serverType, FormatTypeEnum formatType)
@@ -74,9 +77,13 @@ namespace PEMStoreSSH
             CertificateHandler = GetCertificateHandler(formatType);
 
             if (ServerType == ServerTypeEnum.Linux)
+            {
                 SSH = new SSHHandler(Server, ServerId, ServerPassword);
+            }
             else
+            {
                 SSH = new WinRMHandler(Server, ServerId, ServerPassword);
+            }
         }
 
         internal bool DoesStoreExist(string path)
@@ -102,7 +109,9 @@ namespace PEMStoreSSH
                 {
                     byte[] privateKeyContentBytes = null;
                     if (!string.IsNullOrEmpty(PrivateKeyPath))
+                    {
                         privateKeyContentBytes = SSH.DownloadCertificateFile(PrivateKeyPath, CertificateHandler.HasBinaryContent);
+                    }
 
                     containsPrivateKey = CertificateHandler.HasPrivateKey(certContents, privateKeyContentBytes);
                 }
@@ -194,15 +203,21 @@ namespace PEMStoreSSH
                         command += (command.IndexOf("-iname") == -1 ? string.Empty : "-or ");
                         command += $"-iname '{fileName.Trim()}";
                         if (extension.ToLower() == NO_EXTENSION)
+                        {
                             command += $"' ! -iname '*.*' ";
+                        }
                         else
+                        {
                             command += $".{extension.Trim()}' ";
+                        }
                     }
                 }
 
                 string result = string.Empty;
                 if (extensions.Any(p => p.ToLower() != NO_EXTENSION))
+                {
                     result = SSH.RunCommand(command, null, ApplicationSettings.UseSudo, null);
+                }
 
                 return (result.Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries)).ToList();
             }
@@ -223,7 +238,9 @@ namespace PEMStoreSSH
                 string result = SSH.RunCommand(command, null, false, null);
                 paths = result.Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
                 for (int i = 0; i < paths.Length; i++)
+                {
                     paths[i] += @"\";
+                }
             }
 
             foreach (string path in paths)
@@ -231,7 +248,9 @@ namespace PEMStoreSSH
                 foreach (string extension in extensions)
                 {
                     foreach (string fileName in fileNames)
+                    {
                         concatFileNames.Append($",{fileName}.{extension}");
+                    }
                 }
 
                 string command = $@"(Get-ChildItem -Path ""{FormatPath(path)}"" -Recurse -Include {concatFileNames.ToString().Substring(1)}).fullname";
