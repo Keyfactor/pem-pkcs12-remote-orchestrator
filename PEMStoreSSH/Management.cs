@@ -28,11 +28,15 @@ namespace PEMStoreSSH
             dynamic properties = JsonConvert.DeserializeObject(config.JobProperties.ToString());
             bool hasSeparatePrivateKey = properties.separatePrivateKey == null || string.IsNullOrEmpty(properties.separatePrivateKey.Value) ? false : bool.Parse(properties.separatePrivateKey.Value);
             string privateKeyPath = hasSeparatePrivateKey ? (properties.pathToPrivateKey == null || string.IsNullOrEmpty(properties.pathToPrivateKey.Value) ? null : properties.pathToPrivateKey.Value) : string.Empty;
-            
+
             if (properties.type == null || string.IsNullOrEmpty(properties.type.Value))
+            {
                 throw new PEMException("Mising certificate store Type.  Please ensure store is defined as either PEM or PKCS12.");
+            }
             if (hasSeparatePrivateKey && string.IsNullOrEmpty(privateKeyPath))
+            {
                 throw new PEMException("Certificate store is set has having a separate private key but no private key path is specified in the store definition.");
+            }
             
             PEMStore pemStore = new PEMStore
             (
@@ -46,7 +50,9 @@ namespace PEMStoreSSH
             );
 
             if (properties.isSingleCertificateStore != null && !string.IsNullOrEmpty(properties.isSingleCertificateStore.Value))
+            {
                 pemStore.IsSingleCertificateStore = bool.Parse(properties.isSingleCertificateStore.Value);
+            }
 
             try
             {
@@ -65,7 +71,9 @@ namespace PEMStoreSSH
                         }
 
                         if (!ApplicationSettings.CreateStoreOnAddIfMissing && !storeExists)
+                        {
                             throw new PEMException($"Certificate store {certStore.StorePath} does not exist.");
+                        }
 
                         pemStore.AddCertificateToStore
                         (
@@ -81,7 +89,9 @@ namespace PEMStoreSSH
 
                     case CertStoreOperationType.Remove:
                         if (!pemStore.DoesStoreExist(certStore.StorePath))
+                        {
                             throw new PEMException($"Certificate store {certStore.StorePath} does not exist.");
+                        }
 
                         pemStore.RemoveCertificate(jobCert.Alias);
 
@@ -89,11 +99,15 @@ namespace PEMStoreSSH
 
                     case CertStoreOperationType.Create:
                         if (pemStore.DoesStoreExist(certStore.StorePath))
+                        {
                             throw new PEMException($"Certificate store {certStore.StorePath} already exists and cannot be created.");
+                        }
 
                         pemStore.CreateEmptyStoreFile(certStore.StorePath);
                         if (hasSeparatePrivateKey && privateKeyPath != null)
+                        {
                             pemStore.CreateEmptyStoreFile(privateKeyPath);
+                        }
 
                         break;
 
