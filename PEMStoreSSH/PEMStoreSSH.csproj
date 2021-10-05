@@ -20,4 +20,10 @@
     <PackageReference Include="System.Management.Automation" Version="7.0.7" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="manifest.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
