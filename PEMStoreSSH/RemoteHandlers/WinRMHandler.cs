@@ -7,7 +7,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
 using System.Text;
@@ -19,7 +18,9 @@ namespace PEMStoreSSH.RemoteHandlers
         internal WinRMHandler(string server, string serverLogin, string serverPassword)
         {
             if (string.IsNullOrEmpty(server))
+            {
                 throw new PEMException("Blank or missing server name for server orchestration.");
+            }
 
             Server = server;
         }
@@ -45,20 +46,26 @@ namespace PEMStoreSSH.RemoteHandlers
                         ps.Runspace = runspace;
 
                         if (commandText.ToLower().IndexOf("keytool") > -1)
+                        {
                             commandText = "echo '' | " + commandText;
+                        }
                         ps.AddScript(commandText);
 
                         string displayCommand = commandText;
                         if (passwordsToMaskInLog != null)
                         {
                             foreach (string password in passwordsToMaskInLog)
+                            {
                                 displayCommand = displayCommand.Replace(password, PASSWORD_MASK_VALUE);
+                            }
                         }
 
                         if (parameters != null)
                         {
                             foreach (object parameter in parameters)
+                            {
                                 ps.AddArgument(parameter);
+                            }
                         }
 
                         Logger.Debug($"RunCommand: {displayCommand}");
@@ -70,7 +77,9 @@ namespace PEMStoreSSH.RemoteHandlers
                             string errors = string.Empty;
                             System.Collections.ObjectModel.Collection<ErrorRecord> errorRecords = ps.Streams.Error.ReadAll();
                             foreach (ErrorRecord errorRecord in errorRecords)
+                            {
                                 errors += (errorRecord.ToString() + "   ");
+                            }
 
                             throw new ApplicationException(errors);
                         }
@@ -120,9 +129,13 @@ namespace PEMStoreSSH.RemoteHandlers
             Logger.Debug($"DownloadCertificateFile: {path}");
 
             if (hasBinaryContent)
+            {
                 return RunCommandBinary($@"Get-Content -Path ""{path}"" -Encoding Byte -Raw");
+            }
             else
+            {
                 return Encoding.ASCII.GetBytes(RunCommand($@"Get-Content -Path ""{path}""", null, false, null));
+            }
         }
 
         public override void RemoveCertificateFile(string path)
@@ -161,14 +174,18 @@ namespace PEMStoreSSH.RemoteHandlers
                             string errors = string.Empty;
                             System.Collections.ObjectModel.Collection<ErrorRecord> errorRecords = ps.Streams.Error.ReadAll();
                             foreach (ErrorRecord errorRecord in errorRecords)
+                            {
                                 errors += (errorRecord.ToString() + "   ");
+                            }
 
                             throw new ApplicationException(errors);
                         }
                         else
                         {
                             if (psResult.Count > 0)
+                            {
                                 rtnBytes = (byte[])psResult[0].BaseObject;
+                            }
                             Logger.Debug($"WinRM Results: {commandText}::: binary results.");
                         }
                     }
@@ -191,7 +208,9 @@ namespace PEMStoreSSH.RemoteHandlers
             foreach (PSObject resultLine in results)
             {
                 if (resultLine != null)
+                {
                     rtn.Append(resultLine.ToString() + System.Environment.NewLine);
+                }
             }
 
             return rtn.ToString();

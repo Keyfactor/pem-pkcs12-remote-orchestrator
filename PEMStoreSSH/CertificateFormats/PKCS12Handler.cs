@@ -5,20 +5,14 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
 // and limitations under the License.
 
+using Keyfactor.PKI.X509;
+using Org.BouncyCastle.Pkcs;
+using PEMStoreSSH.RemoteHandlers;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
-
-using CSS.PKI.X509;
-
-using Org.BouncyCastle.Crypto;
-using Org.BouncyCastle.Pkcs;
-using Org.BouncyCastle.X509;
-
-using PEMStoreSSH.RemoteHandlers;
 
 namespace PEMStoreSSH
 {
