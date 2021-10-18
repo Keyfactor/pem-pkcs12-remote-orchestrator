@@ -5,15 +5,9 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
 // and limitations under the License.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 using CSS.Common.Logging;
 
-namespace PEMStoreSSH.RemoteHandlers
+namespace Keyfactor.Extensions.Orchestrator.PEMStoreSSH.RemoteHandlers
 {
     abstract class BaseRemoteHandler : LoggingClientBase, IRemoteHandler
     {

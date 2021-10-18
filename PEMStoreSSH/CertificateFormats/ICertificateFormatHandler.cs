@@ -8,9 +8,9 @@
 using System.Collections.Generic;
 using System.Security.Cryptography.X509Certificates;
 
-using PEMStoreSSH.RemoteHandlers;
+using Keyfactor.Extensions.Orchestrator.PEMStoreSSH.RemoteHandlers;
 
-namespace PEMStoreSSH
+namespace Keyfactor.Extensions.Orchestrator.PEMStoreSSH
 {
     interface ICertificateFormatHandler
     {
