@@ -7,7 +7,7 @@
 
 using System;
 
-namespace PEMStoreSSH
+namespace Keyfactor.Extensions.Orchestrator.PEMStoreSSH
 {
     class ExceptionHandler
     {

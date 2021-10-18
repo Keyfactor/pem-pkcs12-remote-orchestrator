@@ -11,7 +11,7 @@ using System.Management.Automation;
 using System.Management.Automation.Runspaces;
 using System.Text;
 
-namespace PEMStoreSSH.RemoteHandlers
+namespace Keyfactor.Extensions.Orchestrator.PEMStoreSSH.RemoteHandlers
 {
     class WinRMHandler : BaseRemoteHandler
     {

@@ -5,7 +5,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
 // and limitations under the License.
 
-using PEMStoreSSH.RemoteHandlers;
+using Keyfactor.Extensions.Orchestrator.PEMStoreSSH.RemoteHandlers;
 using Keyfactor.PKI.PEM;
 using Keyfactor.PKI.PrivateKeys;
 using System;
@@ -14,7 +14,7 @@ using System.Linq;
 using System.Text;
 using System.Security.Cryptography.X509Certificates;
 
-namespace PEMStoreSSH
+namespace Keyfactor.Extensions.Orchestrator.PEMStoreSSH
 {
     class PEMHandler : ICertificateFormatHandler
     {

@@ -11,7 +11,7 @@ using Keyfactor.Orchestrators.Extensions;
 using Newtonsoft.Json;
 using System;
 
-namespace PEMStoreSSH
+namespace Keyfactor.Extensions.Orchestrator.PEMStoreSSH
 {
     public partial class Management: LoggingClientBase, IManagementJobExtension
     {

@@ -7,7 +7,7 @@
 
 using CSS.Common.Logging;
 
-namespace PEMStoreSSH.RemoteHandlers
+namespace Keyfactor.Extensions.Orchestrator.PEMStoreSSH.RemoteHandlers
 {
     abstract class BaseRemoteHandler : LoggingClientBase, IRemoteHandler
     {
