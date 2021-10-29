@@ -5,27 +5,29 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
 // and limitations under the License.
 
-using CSS.Common.Logging;
+using Keyfactor.Logging;
 using Keyfactor.Orchestrators.Common.Enums;
 using Keyfactor.Orchestrators.Extensions;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
 
 namespace Keyfactor.Extensions.Orchestrator.PEMStoreSSH
 {
-    public partial class Management: LoggingClientBase, IManagementJobExtension
+    public partial class Management: IManagementJobExtension
     {
         public string ExtensionName => "PEM-SSH";
 
         public JobResult ProcessJob(ManagementJobConfiguration config)
         {
-            Logger.Debug($"Begin Management...");
+            ILogger logger = LogHandler.GetClassLogger<Management>();
+            logger.LogDebug($"Begin Management...");
 
             CertificateStore certStore = config.CertificateStoreDetails;
             ManagementJobCertificate jobCert = config.JobCertificate;
             bool hasPassword = !string.IsNullOrEmpty(jobCert.PrivateKeyPassword);
             
-            dynamic properties = JsonConvert.DeserializeObject(config.JobProperties.ToString());
+            dynamic properties = JsonConvert.DeserializeObject(certStore.Properties.ToString());
             bool hasSeparatePrivateKey = properties.separatePrivateKey == null || string.IsNullOrEmpty(properties.separatePrivateKey.Value) ? false : bool.Parse(properties.separatePrivateKey.Value);
             string privateKeyPath = hasSeparatePrivateKey ? (properties.pathToPrivateKey == null || string.IsNullOrEmpty(properties.pathToPrivateKey.Value) ? null : properties.pathToPrivateKey.Value) : string.Empty;
 
@@ -114,6 +116,7 @@ namespace Keyfactor.Extensions.Orchestrator.PEMStoreSSH
                     default:
                         return new JobResult()
                         {
+                            JobHistoryId = config.JobHistoryId,
                             Result = OrchestratorJobStatusJobResult.Failure,
                             FailureMessage = $"Site {certStore.StorePath} on server {certStore.ClientMachine}: Unsupported operation: {config.OperationType}"
                         };
@@ -123,6 +126,7 @@ namespace Keyfactor.Extensions.Orchestrator.PEMStoreSSH
             {
                 return new JobResult()
                 {
+                    JobHistoryId = config.JobHistoryId,
                     Result = OrchestratorJobStatusJobResult.Failure,
                     FailureMessage = ExceptionHandler.FlattenExceptionMessages(ex, $"Site {certStore.StorePath} on server {certStore.ClientMachine}:")
                 };
@@ -130,8 +134,9 @@ namespace Keyfactor.Extensions.Orchestrator.PEMStoreSSH
 
             return new JobResult()
             {
+                JobHistoryId = config.JobHistoryId,
                 Result = OrchestratorJobStatusJobResult.Success
             };
         }
     }
-}
+} 
