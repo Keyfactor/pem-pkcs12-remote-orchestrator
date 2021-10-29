@@ -5,6 +5,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
 // and limitations under the License.
 
+using Microsoft.Extensions.Logging;
 using Renci.SshNet;
 using System;
 using System.Collections.Generic;
@@ -50,7 +51,7 @@ namespace PEMStoreSSH.RemoteHandlers
 
         public override string RunCommand(string commandText, object[] arguments, bool withSudo, string[] passwordsToMaskInLog)
         {
-            Logger.Debug($"RunCommand: {Server}");
+            _logger.LogDebug($"RunCommand: {Server}");
 
             string sudo = $"echo -e '\n' | sudo -S ";
             using (SshClient client = new SshClient(Connection))
@@ -75,9 +76,9 @@ namespace PEMStoreSSH.RemoteHandlers
 
                     using (SshCommand command = client.CreateCommand($"{commandText}"))
                     {
-                        Logger.Debug($"RunCommand: {displayCommand}");
+                        _logger.LogDebug($"RunCommand: {displayCommand}");
                         command.Execute();
-                        Logger.Debug($"SSH Results: {displayCommand}::: {command.Result}::: {command.Error}");
+                        _logger.LogDebug($"SSH Results: {displayCommand}::: {command.Result}::: {command.Error}");
                         return command.Result;
                     }
                 }
@@ -90,7 +91,7 @@ namespace PEMStoreSSH.RemoteHandlers
 
         public override bool DoesFileExist(string path)
         {
-            Logger.Debug($"DoesFileExist: {path}");
+            _logger.LogDebug($"DoesFileExist: {path}");
 
             using (SftpClient client = new SftpClient(Connection))
             {
@@ -111,7 +112,7 @@ namespace PEMStoreSSH.RemoteHandlers
 
         public override void UploadCertificateFile(string path, byte[] certBytes)
         {
-            Logger.Debug($"UploadCertificateFile: {path}");
+            _logger.LogDebug($"UploadCertificateFile: {path}");
 
             string uploadPath = path;
             string altPathOnly = string.Empty;
@@ -148,7 +149,7 @@ namespace PEMStoreSSH.RemoteHandlers
 
         public override byte[] DownloadCertificateFile(string path, bool hasBinaryContent)
         {
-            Logger.Debug($"DownloadCertificateFile: {path}");
+            _logger.LogDebug($"DownloadCertificateFile: {path}");
 
             string downloadPath = path;
             string altPathOnly = string.Empty;
@@ -190,7 +191,7 @@ namespace PEMStoreSSH.RemoteHandlers
 
         public override void RemoveCertificateFile(string path)
         {
-            Logger.Debug($"RemoveCertificateFile: {path}");
+            _logger.LogDebug($"RemoveCertificateFile: {path}");
 
             using (SftpClient client = new SftpClient(Connection))
             {

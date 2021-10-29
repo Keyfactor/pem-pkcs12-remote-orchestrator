@@ -5,9 +5,10 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
 // and limitations under the License.
 
-using CSS.Common.Logging;
+using Keyfactor.Logging;
 using Keyfactor.Orchestrators.Common.Enums;
 using Keyfactor.Orchestrators.Extensions;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -15,13 +16,14 @@ using System.Linq;
 
 namespace PEMStoreSSH
 {
-    public class Discovery : LoggingClientBase, IDiscoveryJobExtension
+    public class Discovery : IDiscoveryJobExtension
     {
         public string ExtensionName => "PEM-SSH";
             
         public JobResult ProcessJob(DiscoveryJobConfiguration config, SubmitDiscoveryUpdate submitDiscovery)
         {
-            Logger.Debug($"Begin Discovery...");
+            ILogger logger = LogHandler.GetClassLogger<Discovery>();
+            logger.LogDebug($"Begin Discovery...");
 
             List<string> locations = new List<string>();
 

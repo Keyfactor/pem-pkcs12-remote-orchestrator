@@ -5,21 +5,23 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
 // and limitations under the License.
 
-using CSS.Common.Logging;
+using Keyfactor.Logging;
 using Keyfactor.Orchestrators.Common.Enums;
 using Keyfactor.Orchestrators.Extensions;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
 
 namespace PEMStoreSSH
 {
-    public partial class Management: LoggingClientBase, IManagementJobExtension
+    public partial class Management: IManagementJobExtension
     {
         public string ExtensionName => "PEM-SSH";
 
         public JobResult ProcessJob(ManagementJobConfiguration config)
         {
-            Logger.Debug($"Begin Management...");
+            ILogger logger = LogHandler.GetClassLogger<Management>();
+            logger.LogDebug($"Begin Management...");
 
             CertificateStore certStore = config.CertificateStoreDetails;
             ManagementJobCertificate jobCert = config.JobCertificate;

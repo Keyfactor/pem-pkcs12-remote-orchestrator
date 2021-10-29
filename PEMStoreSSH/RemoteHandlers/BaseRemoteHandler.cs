@@ -5,14 +5,21 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
 // and limitations under the License.
 
-using CSS.Common.Logging;
+using Keyfactor.Logging;
+using Microsoft.Extensions.Logging;
 
 namespace PEMStoreSSH.RemoteHandlers
 {
-    abstract class BaseRemoteHandler : LoggingClientBase, IRemoteHandler
+    abstract class BaseRemoteHandler : IRemoteHandler
     {
+        internal ILogger _logger;
         internal const int PASSWORD_LENGTH_MAX = 100;
         internal const string PASSWORD_MASK_VALUE = "[PASSWORD]";
+
+        public BaseRemoteHandler()
+        {
+            _logger = LogHandler.GetClassLogger(GetType());
+        }
 
         public string Server { get; set; }
 

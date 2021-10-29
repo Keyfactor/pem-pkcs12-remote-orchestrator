@@ -5,9 +5,10 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
 // and limitations under the License.
 
-using CSS.Common.Logging;
+using Keyfactor.Logging;
 using Keyfactor.Orchestrators.Common.Enums;
 using Keyfactor.Orchestrators.Extensions;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -15,13 +16,14 @@ using System.Security.Cryptography.X509Certificates;
 
 namespace PEMStoreSSH
 {
-    public class Inventory: LoggingClientBase, IInventoryJobExtension
+    public class Inventory: IInventoryJobExtension
     {
         public string ExtensionName => "PEM-SSH";
 
         public JobResult ProcessJob(InventoryJobConfiguration config, SubmitInventoryUpdate submitInventory)
         {
-            Logger.Debug($"Begin Inventory.......");
+            ILogger logger = LogHandler.GetClassLogger<Inventory>();
+            logger.LogDebug($"Begin Inventory.......");
 
             CertificateStore certStore = config.CertificateStoreDetails;
             List<CurrentInventoryItem> inventoryItems = new List<CurrentInventoryItem>();
@@ -31,10 +33,10 @@ namespace PEMStoreSSH
                 ApplicationSettings.Initialize(this.GetType().Assembly.Location);
 
                 dynamic properties = JsonConvert.DeserializeObject(certStore.Properties.ToString());
-                Logger.Debug($"Properties: {properties}");
+                logger.LogDebug($"Properties: {properties}");
                 bool hasSeparatePrivateKey = properties.separatePrivateKey == null || string.IsNullOrEmpty(properties.separatePrivateKey.Value) ? false : Boolean.Parse(properties.separatePrivateKey.Value);
                 string privateKeyPath = hasSeparatePrivateKey ? (properties.pathToPrivateKey == null || string.IsNullOrEmpty(properties.pathToPrivateKey.Value) ? null : properties.pathToPrivateKey.Value) : string.Empty;
-                Logger.Debug($"Path to Key: {privateKeyPath}");
+                logger.LogDebug($"Path to Key: {privateKeyPath}");
                 if (properties.type == null || string.IsNullOrEmpty(properties.type.Value))
                 {
                     throw new PEMException("Mising certificate store Type.  Please ensure store is defined as either PEM or PKCS12.");
