@@ -12,7 +12,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace PEMStoreSSH.RemoteHandlers
+namespace Keyfactor.Extensions.Orchestrator.PEMStoreSSH.RemoteHandlers
 {
     class SSHHandler : BaseRemoteHandler
     {

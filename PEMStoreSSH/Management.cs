@@ -12,7 +12,7 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
 
-namespace PEMStoreSSH
+namespace Keyfactor.Extensions.Orchestrator.PEMStoreSSH
 {
     public partial class Management: IManagementJobExtension
     {

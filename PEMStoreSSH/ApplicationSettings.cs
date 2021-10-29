@@ -9,7 +9,7 @@ using System.IO;
 
 using Newtonsoft.Json;
 
-namespace PEMStoreSSH
+namespace Keyfactor.Extensions.Orchestrator.PEMStoreSSH
 {
     class ApplicationSettings
     {

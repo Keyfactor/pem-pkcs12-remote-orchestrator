@@ -14,7 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace PEMStoreSSH
+namespace Keyfactor.Extensions.Orchestrator.PEMStoreSSH
 {
     public class Discovery : IDiscoveryJobExtension
     {

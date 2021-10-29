@@ -3,15 +3,15 @@
       "Keyfactor.Orchestrators.Extensions.IOrchestratorJobExtension": {
         "CertStores.PEM-SSH.Inventory": {
           "assemblypath": "PEMStoreSSH.dll",
-          "TypeFullName": "PEMStoreSSH.Inventory"
+          "TypeFullName": "Keyfactor.Extensions.Orchestrator.PEMStoreSSH.Inventory"
         },
         "CertStores.PEM-SSH.Management": {
           "assemblypath": "PEMStoreSSH.dll",
-          "TypeFullName": "PEMStoreSSH.Management"
+          "TypeFullName": "Keyfactor.Extensions.Orchestrator.PEMStoreSSH.Management"
         },
         "CertStores.PEM-SSH.Discovery": {
-            "assemblypath": "PEMStoreSSH.dll",
-            "TypeFullName": "PEMStoreSSH.Discovery"
+          "assemblypath": "PEMStoreSSH.dll",
+          "TypeFullName": "Keyfactor.Extensions.Orchestrator.PEMStoreSSH.Discovery"
         }
       }
     }

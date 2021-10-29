@@ -5,7 +5,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
 // and limitations under the License.
 
-using PEMStoreSSH.RemoteHandlers;
+
+using Keyfactor.Extensions.Orchestrator.PEMStoreSSH.RemoteHandlers;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -13,7 +14,7 @@ using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 
-namespace PEMStoreSSH
+namespace Keyfactor.Extensions.Orchestrator.PEMStoreSSH
 {
     internal class PEMStore
     {

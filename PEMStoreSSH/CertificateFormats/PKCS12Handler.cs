@@ -7,14 +7,14 @@
 
 using Keyfactor.PKI.X509;
 using Org.BouncyCastle.Pkcs;
-using PEMStoreSSH.RemoteHandlers;
+using Keyfactor.Extensions.Orchestrator.PEMStoreSSH.RemoteHandlers;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 
-namespace PEMStoreSSH
+namespace Keyfactor.Extensions.Orchestrator.PEMStoreSSH
 {
     class PKCS12Handler : ICertificateFormatHandler
     {

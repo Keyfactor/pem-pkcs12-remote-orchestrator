@@ -8,7 +8,7 @@
 using Keyfactor.Logging;
 using Microsoft.Extensions.Logging;
 
-namespace PEMStoreSSH.RemoteHandlers
+namespace Keyfactor.Extensions.Orchestrator.PEMStoreSSH.RemoteHandlers
 {
     abstract class BaseRemoteHandler : IRemoteHandler
     {
