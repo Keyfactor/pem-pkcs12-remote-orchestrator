@@ -27,7 +27,7 @@ namespace PEMStoreSSH
             ManagementJobCertificate jobCert = config.JobCertificate;
             bool hasPassword = !string.IsNullOrEmpty(jobCert.PrivateKeyPassword);
             
-            dynamic properties = JsonConvert.DeserializeObject(config.JobProperties.ToString());
+            dynamic properties = JsonConvert.DeserializeObject(certStore.Properties.ToString());
             bool hasSeparatePrivateKey = properties.separatePrivateKey == null || string.IsNullOrEmpty(properties.separatePrivateKey.Value) ? false : bool.Parse(properties.separatePrivateKey.Value);
             string privateKeyPath = hasSeparatePrivateKey ? (properties.pathToPrivateKey == null || string.IsNullOrEmpty(properties.pathToPrivateKey.Value) ? null : properties.pathToPrivateKey.Value) : string.Empty;
 
