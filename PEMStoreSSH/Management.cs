@@ -116,6 +116,7 @@ namespace PEMStoreSSH
                     default:
                         return new JobResult()
                         {
+                            JobHistoryId = config.JobHistoryId,
                             Result = OrchestratorJobStatusJobResult.Failure,
                             FailureMessage = $"Site {certStore.StorePath} on server {certStore.ClientMachine}: Unsupported operation: {config.OperationType}"
                         };
@@ -125,6 +126,7 @@ namespace PEMStoreSSH
             {
                 return new JobResult()
                 {
+                    JobHistoryId = config.JobHistoryId,
                     Result = OrchestratorJobStatusJobResult.Failure,
                     FailureMessage = ExceptionHandler.FlattenExceptionMessages(ex, $"Site {certStore.StorePath} on server {certStore.ClientMachine}:")
                 };
@@ -132,8 +134,9 @@ namespace PEMStoreSSH
 
             return new JobResult()
             {
+                JobHistoryId = config.JobHistoryId,
                 Result = OrchestratorJobStatusJobResult.Success
             };
         }
     }
-}
+} 

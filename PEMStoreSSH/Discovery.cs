@@ -74,6 +74,7 @@ namespace PEMStoreSSH
             {
                 return new JobResult()
                 {
+                    JobHistoryId = config.JobHistoryId,
                     Result = OrchestratorJobStatusJobResult.Failure,
                     FailureMessage = ExceptionHandler.FlattenExceptionMessages(ex, $"Error on server {config.ClientMachine}:")
                 };
@@ -84,6 +85,7 @@ namespace PEMStoreSSH
                 submitDiscovery.Invoke(locations);
                 return new JobResult()
                 {
+                    JobHistoryId = config.JobHistoryId,
                     Result = OrchestratorJobStatusJobResult.Success
                 };
             }
@@ -91,6 +93,7 @@ namespace PEMStoreSSH
             {
                 return new JobResult()
                 {
+                    JobHistoryId = config.JobHistoryId,
                     Result = OrchestratorJobStatusJobResult.Failure,
                     FailureMessage = ExceptionHandler.FlattenExceptionMessages(ex, $"Error on server {config.ClientMachine}:")
                 };

@@ -99,6 +99,7 @@ namespace PEMStoreSSH
             {
                 return new JobResult()
                 {
+                    JobHistoryId = config.JobHistoryId,
                     Result = OrchestratorJobStatusJobResult.Failure,
                     FailureMessage = ExceptionHandler.FlattenExceptionMessages(ex, $"Site {certStore.StorePath} on server {certStore.ClientMachine}:")
                 };
@@ -109,6 +110,7 @@ namespace PEMStoreSSH
                 submitInventory.Invoke(inventoryItems);
                 return new JobResult()
                 {
+                    JobHistoryId = config.JobHistoryId,
                     Result = certificates.Count == 0 ? OrchestratorJobStatusJobResult.Warning : OrchestratorJobStatusJobResult.Success,
                 };
             }
@@ -116,6 +118,7 @@ namespace PEMStoreSSH
             {
                 return new JobResult()
                 {
+                    JobHistoryId = config.JobHistoryId,
                     Result = OrchestratorJobStatusJobResult.Failure,
                     FailureMessage = ExceptionHandler.FlattenExceptionMessages(ex, $"Site {certStore.StorePath} on server {certStore.ClientMachine}:")
                 };
