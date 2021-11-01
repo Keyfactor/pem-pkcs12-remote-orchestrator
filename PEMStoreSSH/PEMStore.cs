@@ -5,7 +5,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
 // and limitations under the License.
 
-using Keyfactor.Extensions.Pam.Utilities;
+
 using Keyfactor.Extensions.Orchestrator.PEMStoreSSH.RemoteHandlers;
 using System;
 using System.Collections.Generic;
@@ -52,7 +52,7 @@ namespace Keyfactor.Extensions.Orchestrator.PEMStoreSSH
             Server = server;
             StorePath = storeFileAndPath;
             ServerId = serverId;
-            ServerPassword = PamUtility.ResolvePassword(serverPassword);
+            ServerPassword = serverPassword;
             StorePassword = storePassword;
             PrivateKeyPath = privateKeyPath;
             CertificateHandler = GetCertificateHandler(formatType);
@@ -72,7 +72,7 @@ namespace Keyfactor.Extensions.Orchestrator.PEMStoreSSH
         {
             Server = server;
             ServerId = serverId;
-            ServerPassword = PamUtility.ResolvePassword(serverPassword);
+            ServerPassword = serverPassword;
             ServerType = serverType;
             CertificateHandler = GetCertificateHandler(formatType);
 

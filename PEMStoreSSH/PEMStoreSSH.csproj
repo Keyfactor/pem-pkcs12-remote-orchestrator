@@ -11,16 +11,19 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Keyfactor.Extensions.Pam.Utilities" Version="1.0.2" />
     <PackageReference Include="Keyfactor.Logging" Version="1.1.1" />
     <PackageReference Include="Keyfactor.Orchestrators.Common" Version="3.1.2" />
     <PackageReference Include="Keyfactor.Orchestrators.IOrchestratorJobExtensions" Version="0.6.0" />
     <PackageReference Include="Keyfactor.PKI" Version="4.0.1" />
+    <PackageReference Include="Microsoft.PowerShell.SDK" Version="7.0.8" />
+    <PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
     <PackageReference Include="SSH.NET" Version="2020.0.1" />
-    <PackageReference Include="System.Management.Automation" Version="7.0.7" />
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="config.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="manifest.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
