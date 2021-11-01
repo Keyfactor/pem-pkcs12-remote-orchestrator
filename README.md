@@ -46,7 +46,8 @@ The PEM_PKCS12 Windows Orchestrator has been tested against Keyfactor version 8.
 
 In Keyfactor Command create a new Certificate Store Type similar to the one below:
 
-![](Images/Image1.png)
+![](Images/setup-1.png)
+![](Images/setup-2.png)
 
 - **Name** – Required. The display name of the new Certificate Store Type
 - **Short Name** – Required. **MUST** be &quot;PEM-SSH&quot;
@@ -58,54 +59,27 @@ In Keyfactor Command create a new Certificate Store Type similar to the one belo
 - **PFX Password Style** – Select Custom.
 - **Job Types** – Discovery, Inventory, Add, and Remove are the 3 job types implemented by this Orchestrator
 - **Parameters** – Three custom parameters are used for this store type. They are:
+![](Images/setup-3.png)
   - **Type (Name MUST be &quot;type&quot;):**
 
-![](Images/Image2.png)
+![](Images/custom-field-1.png)
 
   - **Separate Private Key File (Name MUST be &quot;separatePrivateKey:** Only applicable for Type=PEM stores, select if the store will contain a private key but the private key will reside in an separate file somewhere else on the server
 
-![](Images/Image3.png)
+![](Images/custom-field-2.png)
 
   - **Path to Private Key File (Name MUST be &quot;pathToPrivateKey&quot;):** Only applicable for Type=PEM stores. If the PEM certificate store has a separate private key file, this is the FULL PATH and file name where the private key resides. File paths on Linux servers will always begin with a &quot;/&quot;. Windows servers will always begin with the drive letter, colon, and backslash, such as &quot;c:\&quot;.
 
-![](Images/Image4.png)
+![](Images/custom-field-3.png)
 
   - **Contains Single Certificate (Name MUST be &quot;isSingleCertificateStore&quot;):** Optional parameter, default value 'False'.  If set to 'True' this certificate store will be managed with the assumption that only one certificate can exist in the store.  All Managment-Add jobs against this store will completely replace the contents of the store with the added certificate, assuming overwrite is set to 'True' for the job.  If overwrite is not selected ('False'), the Management-Add job will complete with an error saying a certificate already exists.  No alias/thumbprint matching will be done when adding/renewing a certificate when this value is set to 'True'.
 
-![](Images/Image14.png)
+![](Images/custom-field-4.png)
 
 
 **2. Register the PEM_PKCS12 Orchestrator with Keyfactor**
 
-Open the Keyfactor Windows Agent Configuration Wizard and perform the tasks as illustrated below:
-
-![](Images/Image5.png)
-
-- Click **\<Next\>**
-
-![](Images/Image6.png)
-
-- If you have configured the agent service previously, you should be able to skip to just click **\<Next\>.** Otherwise, enter the service account Username and Password you wish to run the Keyfactor Windows Agent Service under, click **\<Update Windows Service Account\>** and click **\<Next\>.**
-
-![](Images/Image7.png)
-
-- If you have configured the agent service previously, you should be able to skip to just re-enter the password to the service account the agent service will run under, click **\<Validate Keyfactor Connection\>** and then **\<Next\>.**
-
-![](Images/Image8.png)
-
-- Select the agent you are adding capabilities for (in this case, PEM SSH, and also select the specific capabilities (Discovery, Inventory and Management in this example). Click **\<Next\>**.
-
-![](Images/Image9.png)
-
-- For agent configuration purposes, this screen can be skipped by clicking **\<Next\>**.
-
-![](Images/Image10.png)
-
-- For each Orchestrator implementation, check **Load assemblies containing extension modules from other location** , browse to the location of the compiled Orchestrator dll, and click **\<Validate Capabilities\>**. Once all Orchestrators have been validated, click **\<Apply Configuration\>**.
-
-![](Images/Image11.png)
-
-- If the Keyfactor Agent Configuration Wizard configured everything correctly, you should see the dialog above.
+Download the desired AnyAgent version at https://github.com/Keyfactor/pem-pkcs12-remote-orchestrator. Within Windows File Explorer, navigate to the Keyfactor Orchestrator installation folder (usually C:\Program Files\Keyfactor\Keyfactor Orchestrator), find the "extensions" folder, and under that create a new folder named "PEM-SSH". Under the PEM-SSH folder copy all of the files from the downloaded release to this location.
 
 **3a. (Optional) Create a PEM_PKCS12 Certificate Store within Keyfactor Command**
 
