@@ -5,35 +5,25 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
 // and limitations under the License.
 
+using Keyfactor.Logging;
+using Keyfactor.Orchestrators.Common.Enums;
+using Keyfactor.Orchestrators.Extensions;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-using Newtonsoft.Json;
-
-using Keyfactor.Platform.Extensions.Agents;
-using Keyfactor.Platform.Extensions.Agents.Delegates;
-using Keyfactor.Platform.Extensions.Agents.Interfaces;
-
-using CSS.Common.Logging;
-
-namespace PEMStoreSSH
+namespace Keyfactor.Extensions.Orchestrator.PEMStoreSSH
 {
-    public class Discovery : LoggingClientBase, IAgentJobExtension
+    public class Discovery : IDiscoveryJobExtension
     {
-        public string GetJobClass()
-        {
-            return "Discovery";
-        }
-
-        public string GetStoreType()
-        {
-            return "PEM-SSH";
-        }
+        public string ExtensionName => "PEM-SSH";
             
-        public AnyJobCompleteInfo processJob(AnyJobConfigInfo config, SubmitInventoryUpdate submitInventory, SubmitEnrollmentRequest submitEnrollmentRequest, SubmitDiscoveryResults sdr)
+        public JobResult ProcessJob(DiscoveryJobConfiguration config, SubmitDiscoveryUpdate submitDiscovery)
         {
-            Logger.Debug($"Begin Discovery...");
+            ILogger logger = LogHandler.GetClassLogger<Discovery>();
+            logger.LogDebug($"Begin Discovery...");
 
             List<string> locations = new List<string>();
 
@@ -41,7 +31,7 @@ namespace PEMStoreSSH
             {
                 ApplicationSettings.Initialize(this.GetType().Assembly.Location);
 
-                dynamic properties = JsonConvert.DeserializeObject(config.Job.Properties.ToString());
+                dynamic properties = JsonConvert.DeserializeObject(config.JobProperties.ToString());
                 string[] directoriesToSearch = properties.dirs.Value.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
                 string[] extensionsToSearch = properties.extensions.Value.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
                 string[] ignoredDirs = properties.ignoreddirs.Value.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
@@ -50,34 +40,63 @@ namespace PEMStoreSSH
                 bool isP12 = (bool)properties.compatibility.Value;
 
                 if (directoriesToSearch.Length == 0)
+                {
                     throw new PEMException("Blank or missing search directories for Discovery.");
-                if (extensionsToSearch.Length == 0)
+                }
+                else if (extensionsToSearch.Length == 0)
+                {
                     throw new PEMException("Blank or missing search extensions for Discovery.");
-                if (filesTosearch.Length == 0)
-                    filesTosearch = new string[] { "*" };
+                }
 
-                PEMStore pemStore = new PEMStore(config.Store.ClientMachine, config.Server.Username, config.Server.Password, directoriesToSearch[0].Substring(0, 1) == "/" ? PEMStore.ServerTypeEnum.Linux : PEMStore.ServerTypeEnum.Windows,
-                    isP12 ? PEMStore.FormatTypeEnum.PKCS12 : PEMStore.FormatTypeEnum.PEM);
+                if (filesTosearch.Length == 0)
+                {
+                    filesTosearch = new string[] { "*" };
+                }
+
+                PEMStore pemStore = new PEMStore
+                (
+                    config.ClientMachine,
+                    config.ServerUsername,
+                    config.ServerPassword,
+                    directoriesToSearch[0].Substring(0, 1) == "/" ? PEMStore.ServerTypeEnum.Linux : PEMStore.ServerTypeEnum.Windows,
+                    isP12 ? PEMStore.FormatTypeEnum.PKCS12 : PEMStore.FormatTypeEnum.PEM
+                );
 
                 locations = pemStore.FindStores(directoriesToSearch, extensionsToSearch, filesTosearch).ToList();
                 foreach (string ignoredDir in ignoredDirs)
+                {
                     locations = locations.Where(p => !p.StartsWith(ignoredDir.TrimStart(' '))).ToList();
+                }
 
                 locations = locations.Where(p => pemStore.IsValidStore(p)).ToList();
             }
             catch (Exception ex)
             {
-                return new AnyJobCompleteInfo() { Status = 4, Message = ExceptionHandler.FlattenExceptionMessages(ex, $"Site {config.Store.StorePath} on server {config.Store.ClientMachine}:") };
+                return new JobResult()
+                {
+                    JobHistoryId = config.JobHistoryId,
+                    Result = OrchestratorJobStatusJobResult.Failure,
+                    FailureMessage = ExceptionHandler.FlattenExceptionMessages(ex, $"Error on server {config.ClientMachine}:")
+                };
             }
 
             try
             {
-                sdr.Invoke(locations);
-                return new AnyJobCompleteInfo() { Status = 2, Message = "Successful" };
+                submitDiscovery.Invoke(locations);
+                return new JobResult()
+                {
+                    JobHistoryId = config.JobHistoryId,
+                    Result = OrchestratorJobStatusJobResult.Success
+                };
             }
             catch (Exception ex)
             {
-                return new AnyJobCompleteInfo() { Status = 4, Message = ExceptionHandler.FlattenExceptionMessages(ex, $"Site {config.Store.StorePath} on server {config.Store.ClientMachine}:") };
+                return new JobResult()
+                {
+                    JobHistoryId = config.JobHistoryId,
+                    Result = OrchestratorJobStatusJobResult.Failure,
+                    FailureMessage = ExceptionHandler.FlattenExceptionMessages(ex, $"Error on server {config.ClientMachine}:")
+                };
             }
         }
     }

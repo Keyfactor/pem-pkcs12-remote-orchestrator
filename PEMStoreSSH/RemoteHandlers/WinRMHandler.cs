@@ -5,28 +5,30 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
 // and limitations under the License.
 
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
 using System.Text;
 
-namespace PEMStoreSSH.RemoteHandlers
+namespace Keyfactor.Extensions.Orchestrator.PEMStoreSSH.RemoteHandlers
 {
     class WinRMHandler : BaseRemoteHandler
     {
         internal WinRMHandler(string server, string serverLogin, string serverPassword)
         {
             if (string.IsNullOrEmpty(server))
+            {
                 throw new PEMException("Blank or missing server name for server orchestration.");
+            }
 
             Server = server;
         }
 
         public override string RunCommand(string commandText, object[] parameters, bool withSudo, string[] passwordsToMaskInLog)
         {
-            Logger.Debug($"RunCommand: {Server}");
+            _logger.LogDebug($"RunCommand: {Server}");
 
             try
             {
@@ -35,7 +37,7 @@ namespace PEMStoreSSH.RemoteHandlers
                 {
                     connectionInfo.AuthenticationMechanism = AuthenticationMechanism.Negotiate;
                 }
-                Logger.Trace($"WinRM Authentication Mechanism: {Enum.GetName(typeof(AuthenticationMechanism), connectionInfo.AuthenticationMechanism)}");
+                _logger.LogTrace($"WinRM Authentication Mechanism: {Enum.GetName(typeof(AuthenticationMechanism), connectionInfo.AuthenticationMechanism)}");
 
                 using (Runspace runspace = RunspaceFactory.CreateRunspace(connectionInfo))
                 {
@@ -45,23 +47,29 @@ namespace PEMStoreSSH.RemoteHandlers
                         ps.Runspace = runspace;
 
                         if (commandText.ToLower().IndexOf("keytool") > -1)
+                        {
                             commandText = "echo '' | " + commandText;
+                        }
                         ps.AddScript(commandText);
 
                         string displayCommand = commandText;
                         if (passwordsToMaskInLog != null)
                         {
                             foreach (string password in passwordsToMaskInLog)
+                            {
                                 displayCommand = displayCommand.Replace(password, PASSWORD_MASK_VALUE);
+                            }
                         }
 
                         if (parameters != null)
                         {
                             foreach (object parameter in parameters)
+                            {
                                 ps.AddArgument(parameter);
+                            }
                         }
 
-                        Logger.Debug($"RunCommand: {displayCommand}");
+                        _logger.LogDebug($"RunCommand: {displayCommand}");
                         System.Collections.ObjectModel.Collection<PSObject> psResult = ps.Invoke(parameters);
                         string result = string.Empty;
 
@@ -70,14 +78,16 @@ namespace PEMStoreSSH.RemoteHandlers
                             string errors = string.Empty;
                             System.Collections.ObjectModel.Collection<ErrorRecord> errorRecords = ps.Streams.Error.ReadAll();
                             foreach (ErrorRecord errorRecord in errorRecords)
+                            {
                                 errors += (errorRecord.ToString() + "   ");
+                            }
 
                             throw new ApplicationException(errors);
                         }
                         else
                         {
                             result = FormatResult(psResult);
-                            Logger.Debug($"WinRM Results: {displayCommand}::: {result}");
+                            _logger.LogDebug($"WinRM Results: {displayCommand}::: {result}");
                         }
 
 
@@ -88,21 +98,21 @@ namespace PEMStoreSSH.RemoteHandlers
 
             catch (Exception ex)
             {
-                Logger.Debug("Exception during RunCommand...{ExceptionHandler.FlattenExceptionMessages(ex, ex.Message)}");
+                _logger.LogDebug("Exception during RunCommand...{ExceptionHandler.FlattenExceptionMessages(ex, ex.Message)}");
                 throw ex;
             }
         }
 
         public override bool DoesFileExist(string path)
         {
-            Logger.Debug($"DoesFileExist: {path}");
+            _logger.LogDebug($"DoesFileExist: {path}");
 
             return Convert.ToBoolean(RunCommand($@"Test-Path -path ""{path}""", null, false, null));
         }
 
         public override void UploadCertificateFile(string path, byte[] certBytes)
         {
-            Logger.Debug($"UploadCertificateFile: {path}");
+            _logger.LogDebug($"UploadCertificateFile: {path}");
 
             string scriptBlock = $@"
                                     param($contents)
@@ -117,17 +127,21 @@ namespace PEMStoreSSH.RemoteHandlers
 
         public override byte[] DownloadCertificateFile(string path, bool hasBinaryContent)
         {
-            Logger.Debug($"DownloadCertificateFile: {path}");
+            _logger.LogDebug($"DownloadCertificateFile: {path}");
 
             if (hasBinaryContent)
+            {
                 return RunCommandBinary($@"Get-Content -Path ""{path}"" -Encoding Byte -Raw");
+            }
             else
+            {
                 return Encoding.ASCII.GetBytes(RunCommand($@"Get-Content -Path ""{path}""", null, false, null));
+            }
         }
 
         public override void RemoveCertificateFile(string path)
         {
-            Logger.Debug($"RemoveCertificateFile: {path}");
+            _logger.LogDebug($"RemoveCertificateFile: {path}");
 
             RunCommand($@"rm ""{path}""", null, false, null);
         }
@@ -140,7 +154,7 @@ namespace PEMStoreSSH.RemoteHandlers
 
         private byte[] RunCommandBinary(string commandText)
         {
-            Logger.Debug($"RunCommandBinary: {Server}");
+            _logger.LogDebug($"RunCommandBinary: {Server}");
             byte[] rtnBytes = new byte[0];
 
             try
@@ -153,7 +167,7 @@ namespace PEMStoreSSH.RemoteHandlers
                         ps.Runspace = runspace;
                         ps.AddScript(commandText);
 
-                        Logger.Debug($"RunCommandBinary: {commandText}");
+                        _logger.LogDebug($"RunCommandBinary: {commandText}");
                         System.Collections.ObjectModel.Collection<PSObject> psResult = ps.Invoke();
 
                         if (ps.HadErrors)
@@ -161,15 +175,19 @@ namespace PEMStoreSSH.RemoteHandlers
                             string errors = string.Empty;
                             System.Collections.ObjectModel.Collection<ErrorRecord> errorRecords = ps.Streams.Error.ReadAll();
                             foreach (ErrorRecord errorRecord in errorRecords)
+                            {
                                 errors += (errorRecord.ToString() + "   ");
+                            }
 
                             throw new ApplicationException(errors);
                         }
                         else
                         {
                             if (psResult.Count > 0)
+                            {
                                 rtnBytes = (byte[])psResult[0].BaseObject;
-                            Logger.Debug($"WinRM Results: {commandText}::: binary results.");
+                            }
+                            _logger.LogDebug($"WinRM Results: {commandText}::: binary results.");
                         }
                     }
                 }
@@ -179,7 +197,7 @@ namespace PEMStoreSSH.RemoteHandlers
 
             catch (Exception ex)
             {
-                Logger.Debug("Exception during RunCommandBinary...{ExceptionHandler.FlattenExceptionMessages(ex, ex.Message)}");
+                _logger.LogDebug("Exception during RunCommandBinary...{ExceptionHandler.FlattenExceptionMessages(ex, ex.Message)}");
                 throw ex;
             }
         }
@@ -191,7 +209,9 @@ namespace PEMStoreSSH.RemoteHandlers
             foreach (PSObject resultLine in results)
             {
                 if (resultLine != null)
+                {
                     rtn.Append(resultLine.ToString() + System.Environment.NewLine);
+                }
             }
 
             return rtn.ToString();
