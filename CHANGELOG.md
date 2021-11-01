@@ -1,3 +1,8 @@
+v2.0
+- Upgrade to .Net Core based Universal Orchestrator framework
+- Versions >= 2.x will be compatible with the new Keyfactor Universal Orchestrator framework
+- Versions < 2.x will continue to traget the Keyfactor Windows Orchestrator
+
 v1.3
 - Add config option to use Negotiate when connecting to Windows servers via WinRM
 - Updated Renci.SSH.Net reference
