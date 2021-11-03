@@ -79,7 +79,7 @@ jobs:
         with:
           release_name: ${{ env.REPO_NAME }} ${{ env.RELEASE_VERSION }}
           body: |
-            [Changelog](../CHANGELOG.MD)
+            [Changelog](../CHANGELOG.md)
           draft: false
           prerelease: false
           auto_increment_type: patch
