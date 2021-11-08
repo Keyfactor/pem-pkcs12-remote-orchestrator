@@ -209,9 +209,13 @@ namespace Keyfactor.Extensions.Orchestrator.PEMStoreSSH.RemoteHandlers
 
         public override void CreateEmptyStoreFile(string path)
         {
-            RunCommand($"touch {path}", null, false, null);
-            //using sudo will create as root. set useSudo to false 
-            //to ensure ownership is with the credentials configued in the platform
+            RunCommand($"touch {path}", null, ApplicationSettings.UseSudo, null);
+
+            // modify file owner if cert store file was created with sudo
+            if (ApplicationSettings.UseSudo)
+            {
+                RunCommand($"who | awk '{{print $1}}' | (read user; sudo chown $user {path} )", null, ApplicationSettings.UseSudo, null);
+            }            
         }
 
         private string ReplaceSpacesWithLF(string privateKey)

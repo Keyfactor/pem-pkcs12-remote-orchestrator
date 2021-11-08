@@ -103,7 +103,7 @@ jobs:
         with:
           release_name: Release Candidate ${{ env.REPO_NAME }} ${{ env.RELEASE_VERSION }} 
           body: |
-            [Changelog](../CHANGELOG.MD)
+            [Changelog](../CHANGELOG.md)
           draft: false
           prerelease: true
           prerelease_suffix: rc
