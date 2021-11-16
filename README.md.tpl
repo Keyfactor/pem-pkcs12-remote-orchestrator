@@ -92,7 +92,15 @@ If you choose to manually create a PEM_PKCS12 store In Keyfactor Command rather 
 
 - **Category** – Required. The PEM SSH type name must be selected.
 - **Container** – Optional. Select a container if utilized.
-- **Client Machine & Credentials** – Required. The server name or IP Address and login credentials for the server where the Certificate Store is located.When setting up a Windows server, the format of the machine name must be – [http://_ServerName_:5985](http://ServerName:5985/), where "5985" is the WinRM port number. 5985 is the standard, but if your organization uses a different, use that.
+- **Client Machine & Credentials** – Required. The server name or IP Address and login credentials for the server where the Certificate Store is located.  The credentials for server login can be any of:
+
+  - UserId/Password
+
+  - UserId/SSH private key (entered in the password field)
+
+  - PAM provider information to pass the UserId/Password or UserId/SSH private key credentials
+
+  When setting up a Windows server, the format of the machine name must be – [http://_ServerName_:5985](http://ServerName:5985/), where "5985" is the WinRM port number. 5985 is the standard, but if your organization uses a different, use that.  The credentials used will be the Keyfactor Command service account.  Because of this, for Windows orchestrated servers, setting an additional set of credentials is not necessary.  **However, it is required that the *Change Credentials* link still be clicked on and the resulting dialog closed by clicking OK.**
 - **Store Path** – Required. The FULL PATH and file name of the PEM/PKCS12 store being managed. File paths on Linux servers will always begin with a "/". Windows servers will always begin with the drive letter, colon, and backslash, such as "c:\\".
 - **Type** – Select either PEM or PKCS12
 - **Separate Private Key File** – Check if the store has a separate private key file.
