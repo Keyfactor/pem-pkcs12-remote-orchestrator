@@ -38,7 +38,7 @@ The PEM_PKCS12 Windows Orchestrator has been tested against Keyfactor version 8.
     * echo
     * grep
     * find
-2. The PEM_PKCS12 AnyAgent makes use of SFTP to transfer files to and from the orchestrated server.  SFTP will not mAke use of sudo, so all folders containing certificate stores will need to allow SFTP file transfer.  If this is not possible, set the values in the config.json apprpriately to use an alternative upload/download folder that does have SFTP file transfer (See Section 4 regarding the config.json file).
+2. The PEM_PKCS12 AnyAgent makes use of SFTP to transfer files to and from the orchestrated server.  SFTP will not make use of sudo, so all folders containing certificate stores will need to allow SFTP file transfer.  If this is not possible, set the values in the config.json apprpriately to use an alternative upload/download folder that does have SFTP file transfer (See Section 4 regarding the config.json file).
 
 **For Windows orchestrated servers:**
 1. Make sure that WinRM is set up on the orchestrated server and that the WinRM port is part of the certificate store path when setting up your certificate stores (See Section 3a below). 
@@ -57,7 +57,7 @@ In Keyfactor Command create a new Certificate Store Type similar to the one belo
 - **Needs Server, Blueprint Allowed, Requires Store Password, Supports Entry Password** – All checked/unchecked as shown
 - **Supports Custom Alias** – Required. Select Forbidden. Aliases are not used for PEM and PKCS12 stores.
 - **Use PowerShell** – Unchecked
-- **Store PathType** – Freeform (user will enter the the location of the store)
+- **Store PathType** – Freeform (user will enter the location of the store)
 - **Private Keys** – Optional (a certificate in a PEM/PKCS12 Keystore may or may not contain a private key)
 - **PFX Password Style** – Select Custom.
 - **Job Types** – Discovery, Inventory, Add, and Remove are the 3 job types implemented by this Orchestrator
@@ -71,11 +71,11 @@ In Keyfactor Command create a new Certificate Store Type similar to the one belo
 
 ![](Images/custom-field-2.png)
 
-  - **Path to Private Key File (Name MUST be "pathToPrivateKey"):** Only applicable for Type=PEM stores. If the PEM certificate store has a separate private key file, this is the FULL PATH and file name where the private key resides. File paths on Linux servers will always begin with a "/". Windows servers will always begin with the drive letter, colon, and backslash, such as "c:\".
+  - **Path to Private Key File (Name MUST be "pathToPrivateKey"):** Only applicable for Type=PEM stores. If the PEM certificate store has a separate private key file, this is the FULL PATH and file name where the private key resides. File paths on Linux servers will always begin with a "/". Windows servers will always begin with the drive letter, colon, and backslash, such as "c:\\".
 
 ![](Images/custom-field-3.png)
 
-  - **Contains Single Certificate (Name MUST be "isSingleCertificateStore"):** Optional parameter, default value 'False'.  If set to 'True' this certificate store will be managed with the assumption that only one certificate can exist in the store.  All Managment-Add jobs against this store will completely replace the contents of the store with the added certificate, assuming overwrite is set to 'True' for the job.  If overwrite is not selected ('False'), the Management-Add job will complete with an error saying a certificate already exists.  No alias/thumbprint matching will be done when adding/renewing a certificate when this value is set to 'True'.
+  - **Contains Single Certificate (Name MUST be "isSingleCertificateStore"):** Optional parameter, default value 'False'.  If set to 'True' this certificate store will be managed with the assumption that only one certificate can exist in the store.  All Management-Add jobs against this store will completely replace the contents of the store with the added certificate, assuming overwrite is set to 'True' for the job.  If overwrite is not selected ('False'), the Management-Add job will complete with an error saying a certificate already exists.  No alias/thumbprint matching will be done when adding/renewing a certificate when this value is set to 'True'.
 
 ![](Images/custom-field-4.png)
 
