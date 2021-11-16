@@ -67,7 +67,7 @@ In Keyfactor Command create a new Certificate Store Type similar to the one belo
 
 ![](Images/custom-field-1.png)
 
-  - **Separate Private Key File (Name MUST be "separatePrivateKey:** Only applicable for Type=PEM stores, select if the store will contain a private key but the private key will reside in an separate file somewhere else on the server
+  - **Separate Private Key File (Name MUST be "separatePrivateKey"):** Only applicable for Type=PEM stores, select if the store will contain a private key but the private key will reside in an separate file somewhere else on the server
 
 ![](Images/custom-field-2.png)
 
