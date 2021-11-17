@@ -29,7 +29,7 @@ The version number of a the PEM_PKCS12 Windows Orchestrator can be verified by r
 
 ## Keyfactor Version Supported
 
-The PEM_PKCS12 Windows Orchestrator has been tested against Keyfactor version 8.1.1 but should work against earlier or later versions.
+The PEM_PKCS12 Windows Orchestrator has been tested against Keyfactor Universal Orchestrator version 9.2, but should work against earlier or later versions of the Keyfactor Universal Orchestrator.
 
 ## Security Considerations
 
