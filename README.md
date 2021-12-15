@@ -63,7 +63,7 @@ In Keyfactor Command create a new Certificate Store Type similar to the one belo
 - **Job Types** – Discovery, Inventory, Add, and Remove are the 3 job types implemented by this Orchestrator
 - **Parameters** – Three custom parameters are used for this store type. They are:
 ![](Images/setup-3.png)
-  - **Type (Name MUST be &quot;type&quot;):**
+  - **Type (Name MUST be "type"):**
 
 ![](Images/custom-field-1.png)
 
