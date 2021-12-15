@@ -1,3 +1,6 @@
+v2.0.2
+- Fix sudo usage to take effect when creating cert stores
+
 v2.0
 - Upgrade to .Net Core based Universal Orchestrator framework
 - Versions >= 2.x will be compatible with the new Keyfactor Universal Orchestrator framework
