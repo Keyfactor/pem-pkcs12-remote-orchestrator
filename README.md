@@ -149,7 +149,7 @@ The PEM_PKCS12 Orchestrator uses a JSON config file:
 "CreateStoreOnAddIfMissing": "N",  
 "UseSeparateUploadFilePath": "N",  
 "SeparateUploadFilePath": "/path/to/upload/folder/",  
-"UseNegotiateAuth": "N",  
+"UseNegotiateAuth": "N",
 "UseSCP": "N"
 }
 
