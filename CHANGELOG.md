@@ -1,4 +1,4 @@
-v2.1.0
+v2.1
 - Add support for SCP protocol for transferring files as an alternative to SFTP
 
 v2.0.2
