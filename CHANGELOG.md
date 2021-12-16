@@ -1,3 +1,6 @@
+v2.1.0
+- Add support for SCP protocol for transferring files as an alternative to SFTP
+
 v2.0.2
 - Fix sudo usage to take effect when creating cert stores
 
