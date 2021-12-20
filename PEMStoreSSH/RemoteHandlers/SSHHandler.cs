@@ -79,7 +79,7 @@ namespace Keyfactor.Extensions.Orchestrator.PEMStoreSSH.RemoteHandlers
                         _logger.LogDebug($"RunCommand: {displayCommand}");
                         command.Execute();
                         _logger.LogDebug($"SSH Results: {displayCommand}::: {command.Result}::: {command.Error}");
-                        return command.Result;
+                        return string.IsNullOrEmpty(command.Result) && !string.IsNullOrEmpty(command.Error) ? command.Error : command.Result;
                     }
                 }
                 finally
