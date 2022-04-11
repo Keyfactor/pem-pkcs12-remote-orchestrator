@@ -10,6 +10,7 @@ using Keyfactor.Extensions.Orchestrator.PEMStoreSSH.RemoteHandlers;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
@@ -65,6 +66,18 @@ namespace Keyfactor.Extensions.Orchestrator.PEMStoreSSH
             else
             {
                 SSH = new WinRMHandler(Server, ServerId, ServerPassword);
+            }
+
+            if (!IsStorePathValid(StorePath))
+            {
+                string partialMessage = ServerType == ServerTypeEnum.Windows ? @"'\', ':', " : string.Empty;
+                throw new PEMException($"Store {StorePath} is invalid.  Only alphanumeric, '.', '/', {partialMessage}'-', and '_' characters are allowed in the store path.");
+            }
+
+            if (!String.IsNullOrEmpty(PrivateKeyPath) && !IsStorePathValid(PrivateKeyPath))
+            {
+                string partialMessage = ServerType == ServerTypeEnum.Windows ? @"'\', ':', " : string.Empty;
+                throw new PEMException($"Private key path {PrivateKeyPath} is invalid.  Only alphanumeric, '.', '/', {partialMessage}'-', and '_' characters are allowed in the private key path.");
             }
         }
 
@@ -186,6 +199,12 @@ namespace Keyfactor.Extensions.Orchestrator.PEMStoreSSH
         internal void CreateEmptyStoreFile(string path)
         {
             SSH.CreateEmptyStoreFile(path);
+        }
+
+        internal bool IsStorePathValid(string path)
+        {
+            Regex regex = new Regex(ServerType == ServerTypeEnum.Linux ? $@"^[\d\s\w-_/.]*$" : $@"^[\d\s\w-_/.:\\\\]*$");
+            return regex.IsMatch(path);
         }
 
         private List<string> FindStoresLinux(string[] paths, string[] extensions, string[] fileNames)
