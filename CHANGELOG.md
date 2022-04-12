@@ -1,3 +1,6 @@
+v2.2
+- Limit the valid characters that can be used for store paths to protect against command injection.
+
 v2.1
 - Add support for SCP protocol for transferring files as an alternative to SFTP
 
