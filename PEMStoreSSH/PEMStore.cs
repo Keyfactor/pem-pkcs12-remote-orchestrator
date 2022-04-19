@@ -137,7 +137,7 @@ namespace Keyfactor.Extensions.Orchestrator.PEMStoreSSH
             }
         }
 
-        internal void RemoveCertificate(string alias)
+        internal void RemoveCertificate(string alias, string linuxFilePermissions)
         {
             try
             {
@@ -159,7 +159,7 @@ namespace Keyfactor.Extensions.Orchestrator.PEMStoreSSH
                 {
                     mutex.WaitOne();
                     SSH.RemoveCertificateFile(PrivateKeyPath);
-                    SSH.CreateEmptyStoreFile(PrivateKeyPath);
+                    SSH.CreateEmptyStoreFile(PrivateKeyPath, linuxFilePermissions);
                 }
                 catch (Exception ex)
                 {
@@ -196,9 +196,9 @@ namespace Keyfactor.Extensions.Orchestrator.PEMStoreSSH
             return CertificateHandler.IsValidStore(path, ServerType, SSH);
         }
 
-        internal void CreateEmptyStoreFile(string path)
+        internal void CreateEmptyStoreFile(string path, string linuxFilePermissions)
         {
-            SSH.CreateEmptyStoreFile(path);
+            SSH.CreateEmptyStoreFile(path, linuxFilePermissions);
         }
 
         internal bool IsStorePathValid(string path)

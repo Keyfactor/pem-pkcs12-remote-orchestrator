@@ -33,7 +33,7 @@ namespace Keyfactor.Extensions.Orchestrator.PEMStoreSSH.RemoteHandlers
 
         public abstract void RemoveCertificateFile(string path);
 
-        public abstract void CreateEmptyStoreFile(string path);
+        public abstract void CreateEmptyStoreFile(string path, string linuxFilePermissions);
 
     }
 }
