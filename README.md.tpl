@@ -63,7 +63,7 @@ In Keyfactor Command create a new Certificate Store Type similar to the one belo
 - **Job Types** – Discovery, Inventory, Add, and Remove are the 3 job types implemented by this Orchestrator
 - **Parameters** – Five custom parameters are used for this store type. They are:
 ![](Images/setup-3.png)
-  
+
   - **Type (Name MUST be "type"):**
 
 ![](Images/custom-field-1.png)
@@ -111,6 +111,7 @@ If you choose to manually create a PEM_PKCS12 store In Keyfactor Command rather 
 - **Path to Private Key File** – If Separate Private Key File is checked, enter the FULL PATH to the private key file. File paths on Linux servers will always begin with a "/". Windows servers will always begin with the drive letter, colon, and backslash, such as "c:".
 - **Orchestrator** – Select the orchestrator you wish to use to manage this store
 - **Store Password** – Required. Set the store password or set no password after clicking the supplied button.  If a store password is entered, this value will be used when encrypting private keys that get written to the certificate store during certificate add operations.  Selecting "No Password" will cause an unencrypted private key to be saved during add operations.
+- **Linux File Permissions on Store Creation** - Optional (Linux only). Set the Linux file permissions you wish to be set when creating a new physical certificate store via checking Create Certificate Store above.  This value must be 3 digits all betwwen 0-7.  
 - **Inventory Schedule** – Set a schedule for running Inventory jobs or none, if you choose not to schedule Inventory at this time.
 
 **3b. (Optional) Schedule a PEM_PKCS12 Discovery Job**
