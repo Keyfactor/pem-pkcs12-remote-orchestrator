@@ -39,7 +39,11 @@ namespace Keyfactor.Extensions.Orchestrator.PEMStoreSSH
             {
                 throw new PEMException("Certificate store is set has having a separate private key but no private key path is specified in the store definition.");
             }
-            
+
+            string linuxFilePermissions = properties.linuxFilePermissionsOnStoreCreation == null || string.IsNullOrEmpty(properties.linuxFilePermissionsOnStoreCreation.Value) ?
+                ApplicationSettings.DefaultLinuxPermissionsOnStoreCreation :
+                properties.linuxFilePermissionsOnStoreCreation.Value;
+
             PEMStore pemStore = new PEMStore
             (
                 certStore.ClientMachine,
@@ -67,9 +71,9 @@ namespace Keyfactor.Extensions.Orchestrator.PEMStoreSSH
 
                         if (ApplicationSettings.CreateStoreOnAddIfMissing && !storeExists)
                         {
-                            pemStore.CreateEmptyStoreFile(certStore.StorePath);
+                            pemStore.CreateEmptyStoreFile(certStore.StorePath, linuxFilePermissions);
                             if (hasSeparatePrivateKey && privateKeyPath != null)
-                                pemStore.CreateEmptyStoreFile(privateKeyPath);
+                                pemStore.CreateEmptyStoreFile(privateKeyPath, linuxFilePermissions);
                         }
 
                         if (!ApplicationSettings.CreateStoreOnAddIfMissing && !storeExists)
@@ -95,7 +99,7 @@ namespace Keyfactor.Extensions.Orchestrator.PEMStoreSSH
                             throw new PEMException($"Certificate store {certStore.StorePath} does not exist.");
                         }
 
-                        pemStore.RemoveCertificate(jobCert.Alias);
+                        pemStore.RemoveCertificate(jobCert.Alias, linuxFilePermissions);
 
                         break;
 
@@ -105,10 +109,10 @@ namespace Keyfactor.Extensions.Orchestrator.PEMStoreSSH
                             throw new PEMException($"Certificate store {certStore.StorePath} already exists and cannot be created.");
                         }
 
-                        pemStore.CreateEmptyStoreFile(certStore.StorePath);
+                        pemStore.CreateEmptyStoreFile(certStore.StorePath, linuxFilePermissions);
                         if (hasSeparatePrivateKey && privateKeyPath != null)
                         {
-                            pemStore.CreateEmptyStoreFile(privateKeyPath);
+                            pemStore.CreateEmptyStoreFile(privateKeyPath, linuxFilePermissions);
                         }
 
                         break;
