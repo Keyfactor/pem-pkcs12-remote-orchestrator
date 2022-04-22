@@ -10,12 +10,15 @@ using System;
 using System.Collections.Generic;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
+using System.Net;
 using System.Text;
 
 namespace Keyfactor.Extensions.Orchestrator.PEMStoreSSH.RemoteHandlers
 {
     class WinRMHandler : BaseRemoteHandler
     {
+        WSManConnectionInfo connectionInfo { get; set; }
+
         internal WinRMHandler(string server, string serverLogin, string serverPassword)
         {
             if (string.IsNullOrEmpty(server))
@@ -24,6 +27,11 @@ namespace Keyfactor.Extensions.Orchestrator.PEMStoreSSH.RemoteHandlers
             }
 
             Server = server;
+            connectionInfo = new WSManConnectionInfo(new System.Uri($"{Server}/wsman"));
+            if (!string.IsNullOrEmpty(serverLogin))
+            {
+                connectionInfo.Credential = new PSCredential(serverLogin, new NetworkCredential(serverLogin, serverPassword).SecurePassword);
+            }
         }
 
         public override string RunCommand(string commandText, object[] parameters, bool withSudo, string[] passwordsToMaskInLog)
@@ -32,7 +40,6 @@ namespace Keyfactor.Extensions.Orchestrator.PEMStoreSSH.RemoteHandlers
 
             try
             {
-                WSManConnectionInfo connectionInfo = new WSManConnectionInfo(new System.Uri($"{Server}/wsman"));
                 if (ApplicationSettings.UseNegotiateAuth)
                 {
                     connectionInfo.AuthenticationMechanism = AuthenticationMechanism.Negotiate;
@@ -146,7 +153,7 @@ namespace Keyfactor.Extensions.Orchestrator.PEMStoreSSH.RemoteHandlers
             RunCommand($@"rm ""{path}""", null, false, null);
         }
         
-        public override void CreateEmptyStoreFile(string path)
+        public override void CreateEmptyStoreFile(string path, string linuxFilePermissions)
         {
             RunCommand($@"Out-File -FilePath ""{path}""", null, false, null);
         }
