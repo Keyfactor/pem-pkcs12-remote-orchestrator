@@ -1,5 +1,3 @@
-<!-- add integration specific information below -->
-*** 
 
 ## Use Cases
 
