@@ -10,12 +10,15 @@ using Renci.SshNet;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text.RegularExpressions;
 using System.Text;
 
 namespace Keyfactor.Extensions.Orchestrator.PEMStoreSSH.RemoteHandlers
 {
     class SSHHandler : BaseRemoteHandler
     {
+        private const string LINUX_PERMISSION_REGEXP = "^[0-7]{3}$";
+
         private ConnectionInfo Connection { get; set; }
 
         internal SSHHandler(string server, string serverLogin, string serverPassword)
@@ -79,7 +82,7 @@ namespace Keyfactor.Extensions.Orchestrator.PEMStoreSSH.RemoteHandlers
                         _logger.LogDebug($"RunCommand: {displayCommand}");
                         command.Execute();
                         _logger.LogDebug($"SSH Results: {displayCommand}::: {command.Result}::: {command.Error}");
-                        return command.Result;
+                        return commandText.StartsWith("ls ", StringComparison.OrdinalIgnoreCase) && string.IsNullOrEmpty(command.Result) && !string.IsNullOrEmpty(command.Error) ? command.Error : command.Result;
                     }
                 }
                 finally
@@ -247,15 +250,23 @@ namespace Keyfactor.Extensions.Orchestrator.PEMStoreSSH.RemoteHandlers
             RunCommand($"rm {path}", null, ApplicationSettings.UseSudo, null);
         }
 
-        public override void CreateEmptyStoreFile(string path)
+        public override void CreateEmptyStoreFile(string path, string linuxFilePermissions)
         {
-            RunCommand($"touch {path}", null, ApplicationSettings.UseSudo, null);
+            AreLinuxPermissionsValid(linuxFilePermissions);
+            RunCommand($"install -m {linuxFilePermissions} /dev/null {path}", null, false, null);
 
             // modify file owner if cert store file was created with sudo
             if (ApplicationSettings.UseSudo)
             {
                 RunCommand($"who | awk '{{print $1}}' | (read user; sudo chown $user {path} )", null, ApplicationSettings.UseSudo, null);
             }            
+        }
+
+        public static void AreLinuxPermissionsValid(string permissions)
+        {
+            Regex regex = new Regex(LINUX_PERMISSION_REGEXP);
+            if (!regex.IsMatch(permissions))
+                throw new PEMException($"Invalid format for Linux file permissions.  This value must be exactly 3 digits long with each digit between 0-7 but found {permissions} instead.");
         }
 
         private string ReplaceSpacesWithLF(string privateKey)
