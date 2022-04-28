@@ -14,8 +14,6 @@ The Universal Orchestrator is the successor to the Windows Orchestrator. This Ca
 
 ---
 
-<!-- add integration specific information below -->
-*** 
 
 ## Use Cases
 
@@ -175,3 +173,4 @@ The PEM_PKCS12 Orchestrator uses a JSON config file:
 
 ### License
 [Apache](https://apache.org/licenses/LICENSE-2.0)
+
