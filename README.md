@@ -1,10 +1,19 @@
 # Remote PEM / PKCS12
-## orchestrator
 
 The remote PEM / PKCS12 Orchestrator allows for the remote management of PEM and PKCS12 based certificate stores. Discovery, Inventory, and Management functions are supported. The orchestrator performs operations by issuing remote commands over SSH to Linux based systems and via WinRM to Windows based systems.  **Currently this extension is only intended for use with the Keyfactor Universal Orchestrator installed on a Windows server**.
 
-<!-- add integration specific information below -->
-*** 
+#### Integration status: Pilot - Ready for use in test environments. Not for use in production.
+
+## About the Keyfactor Universal Orchestrator Capability
+
+This repository contains a Universal Orchestrator Capability which is a plugin to the Keyfactor Universal Orchestrator. Within the Keyfactor Platform, Orchestrators are used to manage “certificate stores” &mdash; collections of certificates and roots of trust that are found within and used by various applications.
+
+The Universal Orchestrator is part of the Keyfactor software distribution and is available via the Keyfactor customer portal. For general instructions on installing Capabilities, see the “Keyfactor Command Orchestrator Installation and Configuration Guide” section of the Keyfactor documentation. For configuration details of this specific Capability, see below in this readme.
+
+The Universal Orchestrator is the successor to the Windows Orchestrator. This Capability plugin only works with the Universal Orchestrator and does not work with the Windows Orchestrator.
+
+---
+
 
 ## Use Cases
 
@@ -172,3 +181,4 @@ The PEM_PKCS12 Orchestrator uses a JSON config file:
 
 ### License
 [Apache](https://apache.org/licenses/LICENSE-2.0)
+
