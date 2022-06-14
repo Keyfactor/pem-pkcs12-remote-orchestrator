@@ -104,14 +104,14 @@ namespace Keyfactor.Extensions.Orchestrator.PEMStoreSSH
                     FailureMessage = ExceptionHandler.FlattenExceptionMessages(ex, $"Site {certStore.StorePath} on server {certStore.ClientMachine}:")
                 };
             }
-
+           
             try
             {
                 submitInventory.Invoke(inventoryItems);
                 return new JobResult()
                 {
                     JobHistoryId = config.JobHistoryId,
-                    Result = certificates.Count == 0 ? OrchestratorJobStatusJobResult.Warning : OrchestratorJobStatusJobResult.Success,
+                    Result = certificates.Count == 0 ? OrchestratorJobStatusJobResult.Warning : OrchestratorJobStatusJobResult.Success
                 };
             }
             catch (Exception ex)
