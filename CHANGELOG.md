@@ -1,8 +1,10 @@
+v2.4
+- Bug fixes for installation on Linux hosted Universal Orchestrator
+- Keep file owner/permissions of original certificate store when using separate upload/download folder option
+
 v2.3
 - Add new config.json setting DefaultLinuxPermissionsOnStoreCreation, and certificate store type custom parameter linuxFilePermissionsOnStoreCreation
 - Add ability to use client machine credentials for WinRM Windows servers rather than always using the Keyfactor service account 
-
-
 
 v2.2
 - Limit the valid characters that can be used for store paths to protect against command injection.
