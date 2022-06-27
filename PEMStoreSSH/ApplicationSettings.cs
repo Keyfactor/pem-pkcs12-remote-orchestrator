@@ -28,7 +28,7 @@ namespace Keyfactor.Extensions.Orchestrator.PEMStoreSSH
             string configContents = string.Empty;
             string currDir = Path.GetDirectoryName(currLocation);
 
-            using (StreamReader sr = new StreamReader($@"{currDir}\config.json"))
+            using (StreamReader sr = new StreamReader($@"{currDir}{Path.DirectorySeparatorChar}config.json"))
             {
                 configContents = sr.ReadToEnd();
             }
