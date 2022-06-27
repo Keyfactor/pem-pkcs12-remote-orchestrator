@@ -31,13 +31,12 @@ namespace Keyfactor.Extensions.Orchestrator.PEMStoreSSH
             {
                 ApplicationSettings.Initialize(this.GetType().Assembly.Location);
 
-                dynamic properties = JsonConvert.DeserializeObject(config.JobProperties.ToString());
-                string[] directoriesToSearch = properties.dirs.Value.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-                string[] extensionsToSearch = properties.extensions.Value.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-                string[] ignoredDirs = properties.ignoreddirs.Value.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-                string[] filesTosearch = properties.patterns.Value.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                string[] directoriesToSearch = config.JobProperties["dirs"].ToString().Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                string[] extensionsToSearch = config.JobProperties["extensions"].ToString().Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                string[] ignoredDirs = config.JobProperties["ignoreddirs"].ToString().Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                string[] filesTosearch = config.JobProperties["patterns"].ToString().Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 
-                bool isP12 = (bool)properties.compatibility.Value;
+                bool isP12 = (bool)config.JobProperties["compatibility"];
 
                 if (directoriesToSearch.Length == 0)
                 {

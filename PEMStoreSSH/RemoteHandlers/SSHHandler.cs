@@ -169,7 +169,8 @@ namespace Keyfactor.Extensions.Orchestrator.PEMStoreSSH.RemoteHandlers
 
             if (ApplicationSettings.UseSeparateUploadFilePath)
             {
-                RunCommand($"mv {uploadPath} {path}", null, ApplicationSettings.UseSudo, null);
+                RunCommand($"cp -a {uploadPath} {path}", null, ApplicationSettings.UseSudo, null);
+                RunCommand($"rm {uploadPath}", null, ApplicationSettings.UseSudo, null);
             }
         }
 
@@ -187,11 +188,8 @@ namespace Keyfactor.Extensions.Orchestrator.PEMStoreSSH.RemoteHandlers
             {
                 SplitStorePathFile(path, out altPathOnly, out altFileNameOnly);
                 downloadPath = ApplicationSettings.SeparateUploadFilePath + altFileNameOnly;
-            }
-
-            if (ApplicationSettings.UseSeparateUploadFilePath)
-            {
                 RunCommand($"cp {path} {downloadPath}", null, ApplicationSettings.UseSudo, null);
+                RunCommand($"sudo chown {Connection.Username} {path} )", null, ApplicationSettings.UseSudo, null);
             }
 
             if (ApplicationSettings.UseSCP)
