@@ -1,6 +1,6 @@
 # Remote PEM / PKCS12
 
-**PLEASE NOTE:** This integration has been decprecated and replaced by The RemoteFile Orchestrator Extension - https://github.com/Keyfactor/remote-file-orchestrator. <br><br>The remote PEM / PKCS12 Orchestrator allows for the remote management of PEM and PKCS12 based certificate stores. Discovery, Inventory, and Management functions are supported. The orchestrator performs operations by issuing remote commands over SSH to Linux based systems and via WinRM to Windows based systems.
+**PLEASE NOTE:** This integration has been deprecated and replaced by The RemoteFile Orchestrator Extension - https://github.com/Keyfactor/remote-file-orchestrator. <br><br>The remote PEM / PKCS12 Orchestrator allows for the remote management of PEM and PKCS12 based certificate stores. Discovery, Inventory, and Management functions are supported. The orchestrator performs operations by issuing remote commands over SSH to Linux based systems and via WinRM to Windows based systems.
 
 #### Integration status: Production - Ready for use in production environments.
 
